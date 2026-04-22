@@ -15,10 +15,13 @@ class Quest(Base):
     title: Mapped[str] = mapped_column(String(140))
     description: Mapped[str] = mapped_column(Text)
     planet_code: Mapped[str] = mapped_column(String(40))
+    category: Mapped[str] = mapped_column(String(40), default="daily")
     condition_type: Mapped[str] = mapped_column(String(60))
     threshold: Mapped[float] = mapped_column(Float)
     reward_kind: Mapped[str] = mapped_column(String(40))
     reward_value: Mapped[float] = mapped_column(Float)
+    stars_reward: Mapped[int] = mapped_column(Integer, default=1)
+    display_order: Mapped[int] = mapped_column(Integer, default=100)
     active: Mapped[bool] = mapped_column(Boolean, default=True)
 
 

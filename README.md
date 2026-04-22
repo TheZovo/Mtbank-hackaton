@@ -1,96 +1,47 @@
 # MTB Galaxy
 
-MTB Galaxy теперь собран как mobile-first monorepo: пользовательский клиент живет в `React Native`, а backend работает на полностью асинхронном `FastAPI + PostgreSQL`.
+Этот репозиторий содержит мобильный монорепозиторий MTB Galaxy и отдельный мок-сервер для параллельной разработки интерфейсов, backend-логики и API-контрактов.
 
-## Что внутри
+## Что добавлено по ТЗ
 
-- `apps/mobile` - новый мобильный клиент на `Bare React Native + TypeScript`.
-- `apps/api` - async backend на `FastAPI`, `SQLAlchemy 2 async`, `PostgreSQL`, `Alembic`, `Redis`.
-- `packages/contracts` - TypeScript-контракты новой versioned API.
-- `packages/shared` - общие продуктовые типы и метаданные.
-- `packages/game-core` - platform-neutral логика мини-игр.
+- `mock-server/` - FastAPI мок-сервер с in-memory состоянием, auth, CORS и логированием.
+- `contracts/openapi.yaml` - OpenAPI-спецификация всех ручек из документа.
+- `contracts/generated/api.ts` - сгенерированные TypeScript-типы для фронтенда.
+- `contracts/generate.js` - скрипт повторной генерации спецификации и типов.
 
-## Основные принципы
-
-- Только mobile user app. Старый web-клиент и админка удалены из активной архитектуры.
-- Backend authoritative: прогресс, награды, мастерство, стрики, леджер и результаты мини-игр принадлежат серверу.
-- Аутентификация построена вокруг `телефон + OTP`.
-- PostgreSQL - основная база данных, Redis - вспомогательный runtime для OTP и фоновых задач.
-
-## Структура
-
-```text
-apps/
-  api/
-    src/
-      core/
-      common/
-      db/
-      infrastructure/
-      modules/
-  mobile/
-    src/
-      app/
-      navigation/
-      features/
-      shared/
-packages/
-  contracts/
-  shared/
-  game-core/
-```
-
-## Быстрый старт
-
-Поднимите инфраструктуру:
-
-```bash
-docker compose up -d
-```
-
-Установите Python-зависимости API:
+## Установка
 
 ```bash
 python -m venv .venv
 .venv\Scripts\activate
-pip install -e apps/api[dev]
-```
-
-При необходимости создайте `.env`:
-
-```bash
-copy apps\api\.env.example apps\api\.env
-```
-
-Сгенерируйте OpenAPI-контракты:
-
-```bash
+pip install -r mock-server/requirements.txt
 npm install
-npm run contracts:generate
 ```
 
-Запустите backend:
+## Запуск мок-сервера
+
+Один из двух вариантов:
 
 ```bash
-npm run dev:api
+python mock-server/mock_server.py
 ```
 
-Запустите Metro для mobile-клиента:
+или
 
 ```bash
-npm run dev:mobile
+npm run mock
 ```
 
-Затем отдельно поднимите платформу:
+По умолчанию сервер стартует на `http://localhost:8001`.
 
-```bash
-npm run android
-npm run ios
-```
+### Переменные окружения
 
-## API
+- `MOCK_SERVER_PORT` - порт, по умолчанию `8001`.
+- `MOCK_SERVER_LOG_LEVEL` - уровень логирования, по умолчанию `INFO`.
 
-Базовый префикс всех ручек: `/v1`.
+## Эндпоинты
+
+Все ручки доступны по префиксу `/v1`.
 
 ### Auth
 
@@ -98,48 +49,107 @@ npm run ios
 - `POST /v1/auth/verify-otp`
 - `POST /v1/auth/refresh`
 - `POST /v1/auth/logout`
+
+### Планеты и прогресс
+
+- `GET /v1/planets/list`
+- `GET /v1/planets/{planet_id}/progress`
+- `PATCH /v1/planets/{planet_id}/focus`
+
+### Игры и лидерборд
+
+- `POST /v1/games/{game_code}/runs`
+- `GET /v1/leaderboard/planet/{planet_id}?period=week`
+
+### Профиль, промокоды и рефералы
+
 - `GET /v1/me`
-
-### User Flow
-
-- `GET /v1/profile`
-- `PATCH /v1/profile/focus-planet`
-- `GET /v1/quests`
-- `POST /v1/quests/{quest_id}/claim`
-- `GET /v1/rewards/ledger`
+- `GET /v1/promocodes`
 - `GET /v1/referrals`
 - `POST /v1/referrals`
-- `GET /v1/leaderboard`
-- `POST /v1/games/{game_code}/runs`
-- `GET /v1/games/summary`
 
-## Миграции
+### Администрирование мок-сервера
 
-Alembic настроен на `apps/api/src/db/migrations`.
+- `POST /v1/admin/reset`
+- `POST /v1/admin/end_period`
 
-```bash
-cd apps/api
-alembic upgrade head
-```
-
-## Сиды
-
-Для локальной разработки можно засеять справочники и тестового пользователя:
+## Генерация OpenAPI и TypeScript-типов
 
 ```bash
-python apps/api/scripts/seed_dev_data.py
+npm run generate:api
 ```
 
-## Тесты
+Команда:
 
-Backend:
+1. Создаёт `contracts/openapi.yaml` из FastAPI приложения.
+2. Генерирует `contracts/generated/api.ts` через `openapi-typescript`.
+
+## Проверка
 
 ```bash
-npm run test:api
+python -m pytest mock-server/tests
 ```
 
-Mobile:
+## Примеры curl-запросов
+
+### Запросить OTP
 
 ```bash
-npm run test:mobile
+curl -X POST http://localhost:8001/v1/auth/request-otp ^
+  -H "Content-Type: application/json" ^
+  -d "{\"phone\":\"+79991234567\"}"
 ```
+
+### Подтвердить OTP
+
+```bash
+curl -X POST http://localhost:8001/v1/auth/verify-otp ^
+  -H "Content-Type: application/json" ^
+  -d "{\"phone\":\"+79991234567\",\"code\":\"123456\",\"name\":\"Тестовый\"}"
+```
+
+### Получить профиль
+
+```bash
+curl http://localhost:8001/v1/me ^
+  -H "Authorization: Bearer mock_access_token"
+```
+
+### Отправить результат игры
+
+```bash
+curl -X POST http://localhost:8001/v1/games/halva_snake/runs ^
+  -H "Authorization: Bearer mock_access_token" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"score\":180,\"planet_id\":\"apteki\"}"
+```
+
+### Завершить период
+
+```bash
+curl -X POST http://localhost:8001/v1/admin/end_period
+```
+
+### Сбросить состояние
+
+```bash
+curl -X POST http://localhost:8001/v1/admin/reset
+```
+
+## Как переключить фронтенд на мок-сервер
+
+Используйте базовый URL через переменную окружения `API_BASE_URL`.
+
+Примеры:
+
+- локально в браузере или iOS симуляторе: `API_BASE_URL=http://localhost:8001/v1`
+- Android эмулятор: `API_BASE_URL=http://10.0.2.2:8001/v1`
+- физическое устройство: `API_BASE_URL=http://<ваш-local-ip>:8001/v1`
+
+## Известные упрощения
+
+- Состояние хранится только в памяти и сбрасывается после перезапуска.
+- Любой Bearer токен считается валидным, кроме `invalid-token`.
+- Лимит игровых попыток общий на пользователя и сбрасывается только через `POST /v1/admin/reset` или после перезапуска.
+- Лидерборд детерминированно генерируется мок-данными и не связан с реальными пользователями.
+- Не моделируются бизнес-валидации вроде MCC, антифрода, реальной выдачи промокодов и сложной деградации.

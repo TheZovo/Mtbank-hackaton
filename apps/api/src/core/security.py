@@ -82,6 +82,8 @@ class BonusBreakdown:
     performance_bonus: int
     focus_bonus: int
     total_reward: int
+    cashback_gain: float
+    bonus_points_gain: int
     charge_gain: int
     crates_earned: int
     next_vault_charge: int

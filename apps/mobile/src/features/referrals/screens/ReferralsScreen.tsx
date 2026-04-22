@@ -2,9 +2,9 @@ import { useState } from "react";
 import { Text, View } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createReferral, getReferrals } from "../../../shared/api/client";
-import { Screen } from "../../../shared/ui/Screen";
 import { LoadingView } from "../../../shared/ui/LoadingView";
 import { PrimaryButton } from "../../../shared/ui/PrimaryButton";
+import { Screen } from "../../../shared/ui/Screen";
 import { SectionCard } from "../../../shared/ui/SectionCard";
 import { TextField } from "../../../shared/ui/TextField";
 
@@ -24,6 +24,7 @@ export function ReferralsScreen() {
         queryClient.invalidateQueries({ queryKey: ["profile"] }),
         queryClient.invalidateQueries({ queryKey: ["rewards"] }),
         queryClient.invalidateQueries({ queryKey: ["quests"] }),
+        queryClient.invalidateQueries({ queryKey: ["leaderboard"] }),
       ]);
     },
   });
@@ -33,33 +34,39 @@ export function ReferralsScreen() {
   }
 
   return (
-    <Screen title="Рефералы" subtitle="Социальный контур мобильного приложения с instant reward на сервере.">
-      <SectionCard title="Создать приглашение" description="Приглашение сразу попадает в серверную модель и журнал наград.">
+    <Screen
+      title="Community Nova"
+      subtitle="Referrals now directly feed cashback, loyalty points, social quests and the shared user rating."
+    >
+      <SectionCard
+        title="Send invite"
+        description="Every invite lands on the backend reward ledger immediately, so the social loop stays authoritative."
+      >
         <TextField
           keyboardType="phone-pad"
-          label="Телефон друга"
+          label="Friend phone"
           onChangeText={setInviteePhone}
           placeholder="+1 999 555 44 33"
           value={inviteePhone}
         />
         <PrimaryButton disabled={createMutation.isPending} onPress={() => createMutation.mutate()}>
-          {createMutation.isPending ? "Создаем..." : "Отправить приглашение"}
+          {createMutation.isPending ? "Sending..." : "Send invite"}
         </PrimaryButton>
-        {createMutation.isError ? <Text style={{ color: "#FCA5A5" }}>Не удалось создать реферал.</Text> : null}
+        {createMutation.isError ? <Text style={{ color: "#FCA5A5" }}>Referral could not be created.</Text> : null}
       </SectionCard>
 
-      <SectionCard title="Список приглашений">
+      <SectionCard title="Active invites">
         {referralsQuery.data.length ? (
           referralsQuery.data.map((referral) => (
             <View key={referral.referral_id} style={{ gap: 4 }}>
               <Text style={{ color: "#F3F7FB", fontWeight: "700" }}>{referral.invitee_phone}</Text>
               <Text style={{ color: "#9DB6C9" }}>
-                Код {referral.invite_code} · {referral.state}
+                Code {referral.invite_code} • {referral.state}
               </Text>
             </View>
           ))
         ) : (
-          <Text style={{ color: "#9DB6C9" }}>Приглашений пока нет.</Text>
+          <Text style={{ color: "#9DB6C9" }}>No invites yet.</Text>
         )}
       </SectionCard>
     </Screen>
