@@ -1,0 +1,17 @@
+node_modules/
+dist/
+coverage/
+.vite/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+*.tsbuildinfo
+dev-server*.log
+openapi.json
+apps/api/.env
+apps/mobile/.env
+apps/mobile/ios/Pods/
+apps/mobile/android/.gradle/
+apps/mobile/android/app/build/

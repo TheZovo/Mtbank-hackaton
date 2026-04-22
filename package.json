@@ -1,0 +1,25 @@
+{
+  "name": "mtb-galaxy",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "apps/mobile",
+    "packages/contracts",
+    "packages/shared",
+    "packages/game-core"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n api,mobile -c green,cyan \"npm run dev:api\" \"npm run dev:mobile\"",
+    "dev:api": "python -m uvicorn main:app --app-dir apps/api/src --reload --port 8000",
+    "dev:mobile": "npm run start --workspace @mtb/mobile",
+    "android": "npm run android --workspace @mtb/mobile",
+    "ios": "npm run ios --workspace @mtb/mobile",
+    "test:api": "python -m pytest apps/api/tests",
+    "test:mobile": "npm run test --workspace @mtb/mobile",
+    "contracts:generate": "python apps/api/scripts/export_openapi.py && openapi-typescript apps/api/openapi.json -o packages/contracts/src/generated/api.ts"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "openapi-typescript": "^7.7.0"
+  }
+}
