@@ -6,16 +6,20 @@ from db.models.promocodes import PromoCode
 from db.models.quests import Quest, QuestProgress
 from db.models.referrals import Referral
 from db.models.rewards import RewardLedger
+from db.models.social import Friend, Gift, PaymentRequest
 
 __all__ = [
     "ActivityLog",
     "AuthSession",
     "BoosterWindow",
+    "Friend",
     "GameAttempt",
     "GameRun",
+    "Gift",
     "LeaderboardPeriod",
     "MccToPlanet",
     "OtpChallenge",
+    "PaymentRequest",
     "PlanetState",
     "PromoCode",
     "Quest",

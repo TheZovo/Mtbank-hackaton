@@ -16,6 +16,7 @@ class User(Base):
     user_id: Mapped[str] = mapped_column(String(40), primary_key=True, default=lambda: generate_id("usr"))
     phone: Mapped[str] = mapped_column(String(20), unique=True, index=True)
     display_name: Mapped[str] = mapped_column(String(120))
+    nickname: Mapped[str | None] = mapped_column(String(60), unique=True, index=True, nullable=True)
     segment: Mapped[str] = mapped_column(String(40), default=SegmentKey.STUDENT.value)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)

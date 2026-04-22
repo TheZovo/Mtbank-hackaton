@@ -5,8 +5,10 @@ import { ProfileScreen } from "./ProfileScreen";
 
 const mockGetMe = jest.fn();
 const mockGetPromocodes = jest.fn();
+const mockSaveNickname = jest.fn();
 const mockLogout = jest.fn();
 const mockClearSession = jest.fn();
+const mockUpdateMe = jest.fn();
 
 jest.mock("react-native-safe-area-context", () => {
   const React = require("react");
@@ -25,28 +27,32 @@ jest.mock("@react-native-clipboard/clipboard", () => ({
 jest.mock("../../../shared/api/client", () => ({
   getMe: (...args: unknown[]) => mockGetMe(...args),
   getPromocodes: (...args: unknown[]) => mockGetPromocodes(...args),
+  saveNickname: (...args: unknown[]) => mockSaveNickname(...args),
   logout: (...args: unknown[]) => mockLogout(...args),
 }));
 
 jest.mock("../../../shared/state/session-store", () => ({
-  useSessionStore: (selector: (state: { clear: typeof mockClearSession }) => unknown) =>
-    selector({ clear: mockClearSession }),
+  useSessionStore: (selector: (state: { clear: typeof mockClearSession; updateMe: typeof mockUpdateMe }) => unknown) =>
+    selector({ clear: mockClearSession, updateMe: mockUpdateMe }),
 }));
 
 describe("ProfileScreen", () => {
   beforeEach(() => {
     mockGetMe.mockReset();
     mockGetPromocodes.mockReset();
+    mockSaveNickname.mockReset();
     mockLogout.mockReset();
     mockClearSession.mockReset();
+    mockUpdateMe.mockReset();
     (Clipboard.setString as jest.Mock).mockReset();
   });
 
-  it("renders profile stats and copies promo code", async () => {
+  it("renders profile stats, saves nickname, and copies promo code", async () => {
     mockGetMe.mockResolvedValue({
       id: "user-1",
       phone: "+375290001122",
       name: "Pilot Roman",
+      nickname: "roman",
       daily_game_attempts_used: 2,
       daily_game_attempts_limit: 5,
       total_constellations_sum: 4,
@@ -62,9 +68,14 @@ describe("ProfileScreen", () => {
         },
       ],
     });
+    mockSaveNickname.mockResolvedValue({
+      id: "user-1",
+      nickname: "captain",
+    });
 
     const queryClient = new QueryClient({
       defaultOptions: {
+        mutations: { gcTime: Infinity, retry: false },
         queries: { gcTime: Infinity, retry: false },
       },
     });
@@ -81,7 +92,19 @@ describe("ProfileScreen", () => {
       expect(screen.getByText("Pilot Roman")).toBeTruthy();
       expect(screen.getByText("+375290001122")).toBeTruthy();
       expect(screen.getByText("MTB_APTEKI_20260422_ABCD")).toBeTruthy();
+      expect(screen.getByDisplayValue("roman")).toBeTruthy();
     });
+
+    fireEvent.changeText(screen.getByPlaceholderText("Ваш nickname"), "captain");
+    fireEvent.press(screen.getByText("Сохранить nickname"));
+
+    await waitFor(() => expect(mockSaveNickname).toHaveBeenCalledWith("captain", "user-1"));
+    expect(mockUpdateMe).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: "user-1",
+        nickname: "captain",
+      }),
+    );
 
     fireEvent.press(screen.getByText("Скопировать"));
 

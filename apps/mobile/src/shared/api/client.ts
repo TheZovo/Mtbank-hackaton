@@ -587,3 +587,81 @@ export async function getGameSummary(): Promise<GameSummary> {
     games: FALLBACK_SUMMARY_GAMES,
   };
 }
+
+export interface NicknameUser {
+  id: string;
+  nickname: string;
+}
+
+export interface FriendEntry {
+  id: string;
+  nickname: string;
+  games_played: number;
+}
+
+export interface PlayTogetherResult {
+  gift: boolean;
+  promocode?: string;
+}
+
+export interface PaymentRequestSummary {
+  id: string;
+  amount: number;
+  description: string;
+  status: string;
+}
+
+export async function saveNickname(nickname: string, userId?: string): Promise<NicknameUser> {
+  return fetchJson<NicknameUser>(`/users`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      nickname,
+      ...(userId ? { user_id: userId } : {}),
+    }),
+  });
+}
+
+export async function findUserByNickname(nickname: string): Promise<NicknameUser> {
+  const encoded = encodeURIComponent(nickname.trim());
+  return fetchJson<NicknameUser>(`/users?nickname=${encoded}`);
+}
+
+export async function addFriend(userId: string, friendId: string): Promise<{ success: boolean }> {
+  return fetchJson<{ success: boolean }>(`/friends`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: userId, friend_id: friendId }),
+  });
+}
+
+export async function getFriends(userId: string): Promise<FriendEntry[]> {
+  return fetchJson<FriendEntry[]>(`/friends/${userId}`);
+}
+
+export async function playTogether(userId: string, friendId: string): Promise<PlayTogetherResult> {
+  return fetchJson<PlayTogetherResult>(`/play-together`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: userId, friend_id: friendId }),
+  });
+}
+
+export async function createPaymentRequest(amount: number, description: string, userId: string): Promise<{ id: string }> {
+  return fetchJson<{ id: string }>(`/payment-requests`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ amount, description, user_id: userId }),
+  });
+}
+
+export async function getPaymentRequestById(id: string): Promise<PaymentRequestSummary> {
+  return fetchJson<PaymentRequestSummary>(`/payment-requests/${id}`);
+}
+
+export async function payPaymentRequest(id: string): Promise<{ success: boolean }> {
+  return fetchJson<{ success: boolean }>(`/payment-requests/${id}/pay`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+}

@@ -1,8 +1,8 @@
 import Clipboard from "@react-native-clipboard/clipboard";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { getMe, getPromocodes, logout } from "../../../shared/api/client";
+import { getMe, getPromocodes, logout, saveNickname } from "../../../shared/api/client";
 import { useSessionStore } from "../../../shared/state/session-store";
 import { colors } from "../../../shared/theme/colors";
 import { LoadingView } from "../../../shared/ui/LoadingView";
@@ -11,6 +11,7 @@ import { Screen } from "../../../shared/ui/Screen";
 import { SectionCard } from "../../../shared/ui/SectionCard";
 import { SecondaryButton } from "../../../shared/ui/SecondaryButton";
 import { StatCard } from "../../../shared/ui/StatCard";
+import { TextField } from "../../../shared/ui/TextField";
 
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString("ru-RU", {
@@ -23,7 +24,10 @@ function formatDate(value: string) {
 export function ProfileScreen() {
   const queryClient = useQueryClient();
   const clearSession = useSessionStore((state) => state.clear);
+  const updateMe = useSessionStore((state) => state.updateMe);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [nicknameDraft, setNicknameDraft] = useState("");
+  const [nicknameFeedback, setNicknameFeedback] = useState<string | null>(null);
   const meQuery = useQuery({
     queryKey: ["me"],
     queryFn: getMe,
@@ -32,6 +36,33 @@ export function ProfileScreen() {
     queryKey: ["promocodes"],
     queryFn: getPromocodes,
   });
+  const saveNicknameMutation = useMutation({
+    mutationFn: async () => saveNickname(nicknameDraft.trim(), meQuery.data?.id),
+    onSuccess: () => {
+      if (!meQuery.data) {
+        return;
+      }
+      updateMe({
+        ...meQuery.data,
+        nickname: nicknameDraft.trim(),
+      });
+      setNicknameFeedback("Nickname сохранён.");
+      void queryClient.invalidateQueries({ queryKey: ["me"] });
+    },
+    onError: (error) => {
+      setNicknameFeedback(error instanceof Error ? error.message : "Не удалось сохранить nickname.");
+    },
+  });
+
+  useEffect(() => {
+    if (meQuery.data?.nickname) {
+      setNicknameDraft(meQuery.data.nickname);
+      return;
+    }
+    if (meQuery.data && !nicknameDraft) {
+      setNicknameDraft("");
+    }
+  }, [meQuery.data?.nickname]);
 
   if (meQuery.isLoading || promocodesQuery.isLoading) {
     return <LoadingView label="Собираем профиль..." />;
@@ -76,7 +107,22 @@ export function ProfileScreen() {
         <View style={styles.identityCard}>
           <Text style={styles.identityName}>{me.name}</Text>
           <Text style={styles.identityPhone}>{me.phone}</Text>
+          <Text style={styles.identityMeta}>Nickname: {me.nickname ?? "не задан"}</Text>
         </View>
+      </SectionCard>
+
+      <SectionCard title="Nickname" description="Документ требует отдельный nickname-flow для поиска друзей и игровых сценариев.">
+        <TextField
+          autoCapitalize="none"
+          label="Ваш nickname"
+          onChangeText={setNicknameDraft}
+          placeholder="Ваш nickname"
+          value={nicknameDraft}
+        />
+        <PrimaryButton disabled={!nicknameDraft.trim() || saveNicknameMutation.isPending} onPress={() => saveNicknameMutation.mutate()}>
+          {saveNicknameMutation.isPending ? "Сохраняем..." : "Сохранить nickname"}
+        </PrimaryButton>
+        {nicknameFeedback ? <Text style={styles.feedback}>{nicknameFeedback}</Text> : null}
       </SectionCard>
 
       <SectionCard title="Статистика">
@@ -135,6 +181,16 @@ const styles = StyleSheet.create({
   identityPhone: {
     color: colors.textMuted,
     fontSize: 15,
+  },
+  identityMeta: {
+    color: colors.primary,
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  feedback: {
+    color: colors.primary,
+    fontSize: 13,
+    lineHeight: 19,
   },
   promoCard: {
     backgroundColor: colors.surfaceElevated,

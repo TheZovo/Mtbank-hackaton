@@ -14,8 +14,10 @@ from infrastructure.jobs.dispatcher import JobDispatcher
 from modules.admin.router import router as admin_router
 from modules.auth.router import router as auth_router
 from modules.devtools.seed import seed_defaults
+from modules.friends.router import router as friends_router
 from modules.games.router import router as games_router
 from modules.leaderboard.router import router as leaderboard_router
+from modules.payment_requests.router import router as payment_requests_router
 from modules.planets.router import router as planets_router
 from modules.profile.router import router as profile_router
 from modules.promocodes.router import router as promocodes_router
@@ -60,6 +62,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     api = app_settings.api_prefix
     app.include_router(auth_router, prefix=api)
     app.include_router(users_router, prefix=api)
+    app.include_router(friends_router, prefix=api)
+    app.include_router(payment_requests_router, prefix=api)
     app.include_router(profile_router, prefix=api)
     app.include_router(promocodes_router, prefix=api)
     app.include_router(planets_router, prefix=api)

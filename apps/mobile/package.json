@@ -23,11 +23,16 @@
     "react-native-gesture-handler": "^2.22.0",
     "react-native-keychain": "^10.0.0",
     "react-native-mmkv": "^4.3.0",
+    "react-native-nitro-image": "^0.13.1",
+    "react-native-nitro-modules": "^0.35.4",
+    "react-native-qrcode-svg": "^6.3.21",
     "react-native-reanimated": "^3.16.7",
     "react-native-safe-area-context": "^5.4.0",
     "react-native-screens": "^4.10.0",
     "react-native-svg": "^15.15.4",
     "react-native-view-shot": "^4.0.2",
+    "react-native-vision-camera": "^5.0.4",
+    "react-native-vision-camera-barcode-scanner": "^5.0.4",
     "zustand": "^5.0.3"
   },
   "devDependencies": {

@@ -4,14 +4,15 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Circle, Path, Rect } from "react-native-svg";
 import { colors } from "../shared/theme/colors";
 
-type IconName = "planets" | "games" | "leaderboard" | "profile" | "referrals";
+type IconName = "planets" | "leaderboard" | "profile" | "friends" | "ai" | "qr";
 
 const routeIconMap: Record<string, IconName> = {
   PlanetsMap: "planets",
-  GamesHub: "games",
   Leaderboard: "leaderboard",
+  Friends: "friends",
+  AI: "ai",
+  QR: "qr",
   Profile: "profile",
-  Referrals: "referrals",
 };
 
 function TabIcon({ focused, name }: { name: IconName; focused: boolean }) {
@@ -28,23 +29,43 @@ function TabIcon({ focused, name }: { name: IconName; focused: boolean }) {
     );
   }
 
-  if (name === "games") {
-    return (
-      <Svg height={22} viewBox="0 0 24 24" width={22}>
-        <Rect fill={fill} height="11" rx="4" stroke={stroke} strokeWidth="1.8" width="18" x="3" y="8" />
-        <Path d="M8 12.5h4M10 10.5v4" stroke={stroke} strokeLinecap="round" strokeWidth="1.8" />
-        <Circle cx="16.5" cy="12" fill={stroke} r="1.1" />
-        <Circle cx="18.8" cy="14.3" fill={stroke} r="1.1" />
-      </Svg>
-    );
-  }
-
   if (name === "leaderboard") {
     return (
       <Svg height={22} viewBox="0 0 24 24" width={22}>
         <Rect fill={fill} height="6" rx="1.5" stroke={stroke} strokeWidth="1.8" width="4" x="4" y="14" />
         <Rect fill={fill} height="10" rx="1.5" stroke={stroke} strokeWidth="1.8" width="4" x="10" y="10" />
         <Rect fill={fill} height="14" rx="1.5" stroke={stroke} strokeWidth="1.8" width="4" x="16" y="6" />
+      </Svg>
+    );
+  }
+
+  if (name === "friends") {
+    return (
+      <Svg height={22} viewBox="0 0 24 24" width={22}>
+        <Circle cx="8.5" cy="9" fill={fill} r="2.6" stroke={stroke} strokeWidth="1.8" />
+        <Circle cx="15.7" cy="11" fill={fill} r="2.2" stroke={stroke} strokeWidth="1.8" />
+        <Path d="M4.5 18c1.2-2.4 2.9-3.5 5-3.5 2.3 0 4 1.1 5 3.5" fill="none" stroke={stroke} strokeLinecap="round" strokeWidth="1.8" />
+        <Path d="M13 18c.8-1.8 2-2.6 3.7-2.6 1.1 0 2.1.4 3 1.2" fill="none" stroke={stroke} strokeLinecap="round" strokeWidth="1.6" />
+      </Svg>
+    );
+  }
+
+  if (name === "ai") {
+    return (
+      <Svg height={22} viewBox="0 0 24 24" width={22}>
+        <Path d="M12 3.5 13.9 8l4.8.4-3.7 3 1.2 4.6-4.2-2.5-4.2 2.5 1.2-4.6-3.7-3 4.8-.4Z" fill={fill} stroke={stroke} strokeLinejoin="round" strokeWidth="1.5" />
+        <Path d="M12 8.5v3M10.3 10.2h3.4" stroke={stroke} strokeLinecap="round" strokeWidth="1.5" />
+      </Svg>
+    );
+  }
+
+  if (name === "qr") {
+    return (
+      <Svg height={22} viewBox="0 0 24 24" width={22}>
+        <Rect fill={fill} height="6" rx="1" stroke={stroke} strokeWidth="1.8" width="6" x="3.5" y="3.5" />
+        <Rect fill={fill} height="6" rx="1" stroke={stroke} strokeWidth="1.8" width="6" x="14.5" y="3.5" />
+        <Rect fill={fill} height="6" rx="1" stroke={stroke} strokeWidth="1.8" width="6" x="3.5" y="14.5" />
+        <Path d="M14.5 14.5h2.5v2.5h-2.5zM18.5 14.5h2v6h-6v-2M14.5 18.5h2" fill="none" stroke={stroke} strokeWidth="1.8" />
       </Svg>
     );
   }
@@ -58,14 +79,7 @@ function TabIcon({ focused, name }: { name: IconName; focused: boolean }) {
     );
   }
 
-  return (
-    <Svg height={22} viewBox="0 0 24 24" width={22}>
-      <Circle cx="8.5" cy="9" fill={fill} r="2.6" stroke={stroke} strokeWidth="1.8" />
-      <Circle cx="15.7" cy="11" fill={fill} r="2.2" stroke={stroke} strokeWidth="1.8" />
-      <Path d="M4.5 18c1.2-2.4 2.9-3.5 5-3.5 2.3 0 4 1.1 5 3.5" fill="none" stroke={stroke} strokeLinecap="round" strokeWidth="1.8" />
-      <Path d="M13 18c.8-1.8 2-2.6 3.7-2.6 1.1 0 2.1.4 3 1.2" fill="none" stroke={stroke} strokeLinecap="round" strokeWidth="1.6" />
-    </Svg>
-  );
+  return null;
 }
 
 export function BrandTabBar({ descriptors, navigation, state }: BottomTabBarProps) {

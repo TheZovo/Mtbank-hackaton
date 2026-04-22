@@ -2,7 +2,8 @@ import { NavigationContainer, DarkTheme } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SignInScreen } from "../features/auth/screens/SignInScreen";
-import { GamesHubScreen } from "../features/games/screens/GamesHubScreen";
+import { AIScreen } from "../features/ai/screens/AIScreen";
+import { FriendsScreen } from "../features/friends/screens/FriendsScreen";
 import { GameScreen } from "../features/games/screens/GameScreen";
 import { ShieldGameScreen } from "../features/games/screens/ShieldGameScreen";
 import { SnakeGameScreen } from "../features/games/screens/SnakeGameScreen";
@@ -11,7 +12,7 @@ import { LeaderboardScreen } from "../features/leaderboard/screens/LeaderboardSc
 import { PlanetDetailScreen } from "../features/planets/screens/PlanetDetailScreen";
 import { PlanetsMapScreen } from "../features/planets/screens/PlanetsMapScreen";
 import { ProfileScreen } from "../features/profile/screens/ProfileScreen";
-import { ReferralsScreen } from "../features/referrals/screens/ReferralsScreen";
+import { QRScreen } from "../features/qr/screens/QRScreen";
 import { BrandTabBar } from "./BrandTabBar";
 import { useSessionBootstrap } from "../shared/hooks/useSessionBootstrap";
 import { useSessionStore } from "../shared/state/session-store";
@@ -30,10 +31,11 @@ function AppTabs() {
       tabBar={(props) => <BrandTabBar {...props} />}
     >
       <Tab.Screen name="PlanetsMap" component={PlanetsMapScreen} options={{ title: "Планеты" }} />
-      <Tab.Screen name="GamesHub" component={GamesHubScreen} options={{ title: "Игры" }} />
       <Tab.Screen name="Leaderboard" component={LeaderboardScreen} options={{ title: "Рейтинг" }} />
+      <Tab.Screen name="Friends" component={FriendsScreen} options={{ title: "Друзья" }} />
+      <Tab.Screen name="AI" component={AIScreen} options={{ title: "AI" }} />
+      <Tab.Screen name="QR" component={QRScreen} options={{ title: "QR" }} />
       <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: "Профиль" }} />
-      <Tab.Screen name="Referrals" component={ReferralsScreen} options={{ title: "Рефералы" }} />
     </Tab.Navigator>
   );
 }

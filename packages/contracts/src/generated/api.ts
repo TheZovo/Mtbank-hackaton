@@ -290,3 +290,61 @@ export interface GalaxyProfile {
     late_flags: number;
   };
 }
+
+export interface UserByNicknameRequest {
+  nickname: string;
+  user_id?: string | null;
+}
+
+export interface UserByNicknameResponse {
+  id: string;
+  nickname: string;
+}
+
+export interface FriendAddRequest {
+  user_id: string;
+  friend_id: string;
+}
+
+export interface FriendEntryOut {
+  id: string;
+  nickname: string;
+  games_played: number;
+}
+
+export type FriendsListResponse = FriendEntryOut[];
+
+export interface PlayTogetherRequest {
+  user_id: string;
+  friend_id: string;
+}
+
+export interface PlayTogetherResponse {
+  gift: boolean;
+  promocode?: string | null;
+}
+
+export interface SimpleSuccessResponse {
+  success: boolean;
+}
+
+export interface PaymentRequestCreateRequest {
+  amount: number;
+  description: string;
+  user_id: string;
+}
+
+export interface PaymentRequestCreateResponse {
+  id: string;
+}
+
+export interface PaymentRequestOut {
+  id: string;
+  amount: number;
+  description: string;
+  status: string;
+}
+
+export interface PaymentRequestPayResponse {
+  success: boolean;
+}

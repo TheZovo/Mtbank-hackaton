@@ -13,6 +13,7 @@ class UserSummaryOut(BaseModel):
     user_id: str
     phone: str
     display_name: str
+    nickname: str | None = None
     segment: SegmentKey
     created_at: datetime
 
@@ -168,6 +169,7 @@ class MeResponse(BaseModel):
     id: str
     phone: str
     name: str
+    nickname: str | None = None
     daily_game_attempts_used: int
     daily_game_attempts_limit: int
     user: UserSummaryOut

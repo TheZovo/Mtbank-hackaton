@@ -78,6 +78,7 @@ async def build_me_response(session: AsyncSession, user: User) -> MeResponse:
         id=user.user_id,
         phone=user.phone,
         name=user.display_name,
+        nickname=user.nickname,
         daily_game_attempts_used=attempts.attempts_used if attempts is not None else 0,
         daily_game_attempts_limit=5,
         user=UserSummaryOut.model_validate(user, from_attributes=True),
