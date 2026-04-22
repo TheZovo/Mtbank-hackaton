@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import json
 from dataclasses import asdict
-from datetime import timedelta
+from datetime import date, timedelta
 from math import floor, sqrt
 
 from fastapi import HTTPException, status
@@ -10,7 +11,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from common.enums import GameCode, PlanetCode, QuestStatus, SegmentKey
 from core.security import BonusBreakdown, generate_id, make_display_name, utcnow
-from db.models import ActivityLog, BoosterWindow, GameRun, PlanetState, Quest, QuestProgress, Referral, RewardLedger, User, UserProfile
+from db.models import (
+    ActivityLog,
+    BoosterWindow,
+    GameRun,
+    MccToPlanet,
+    PlanetState,
+    Quest,
+    QuestProgress,
+    Referral,
+    RewardLedger,
+    User,
+    UserProfile,
+)
+from modules.planets.config import CASHBACK_INCREMENT, PLANET_CONFIGS, get_constellation, get_planet_config
 
 
 PLANET_WEIGHTS = {
@@ -24,6 +38,8 @@ GAME_PLANET_MAP = {
     GameCode.CREDIT_SHIELD_REACTOR.value: PlanetCode.CREDIT_SHIELD.value,
     GameCode.SOCIAL_RING_SIGNAL.value: PlanetCode.SOCIAL_RING.value,
 }
+
+PROMOCODE_SOURCE = "be2_promocode_request"
 
 DEFAULT_QUESTS = (
     {
@@ -130,6 +146,18 @@ async def seed_quest_catalog(session: AsyncSession) -> None:
     await session.flush()
 
 
+async def seed_mcc_to_planet(session: AsyncSession) -> None:
+    for planet in PLANET_CONFIGS.values():
+        for mcc_code in planet.mcc_codes:
+            existing = await session.get(MccToPlanet, mcc_code)
+            if existing is None:
+                session.add(MccToPlanet(mcc_code=mcc_code, planet_id=planet.id, description=planet.name))
+            else:
+                existing.planet_id = planet.id
+                existing.description = planet.name
+    await session.flush()
+
+
 async def ensure_quest_progress(session: AsyncSession, user_id: str) -> None:
     quest_ids = list((await session.scalars(select(Quest.quest_id))).all())
     existing = {
@@ -171,7 +199,14 @@ async def provision_user(
     await session.flush()
     session.add(UserProfile(user_id=user.user_id))
     for planet_code in PlanetCode:
-        session.add(PlanetState(user_id=user.user_id, planet_code=planet_code.value))
+        config = get_planet_config(planet_code.value)
+        session.add(
+            PlanetState(
+                user_id=user.user_id,
+                planet_code=planet_code.value,
+                cashback_percent=config.cashback_start if config else 0,
+            )
+        )
     await seed_quest_catalog(session)
     await ensure_quest_progress(session, user.user_id)
     session.add(
@@ -231,15 +266,141 @@ async def get_planet_state(session: AsyncSession, user_id: str, planet_code: str
     return planet_state
 
 
-async def apply_game_run(session: AsyncSession, *, user: User, game_code: str, score: int) -> GameRun:
+async def ensure_planet_state(session: AsyncSession, user_id: str, planet_id: str, *, for_update: bool = False) -> PlanetState:
+    config = get_planet_config(planet_id)
+    if config is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Планета не найдена")
+
+    statement = select(PlanetState).where(PlanetState.user_id == user_id, PlanetState.planet_code == planet_id)
+    if for_update:
+        statement = statement.with_for_update()
+    planet_state = await session.scalar(statement)
+    if planet_state is None:
+        planet_state = PlanetState(user_id=user_id, planet_code=planet_id, cashback_percent=config.cashback_start)
+        session.add(planet_state)
+        await session.flush()
+    if planet_state.cashback_percent <= 0:
+        planet_state.cashback_percent = config.cashback_start
+    return planet_state
+
+
+async def ensure_all_planet_states(session: AsyncSession, user_id: str) -> list[PlanetState]:
+    states: list[PlanetState] = []
+    for planet_id in PLANET_CONFIGS:
+        states.append(await ensure_planet_state(session, user_id, planet_id))
+    await session.flush()
+    return states
+
+
+async def issue_promocode_request(
+    session: AsyncSession,
+    *,
+    user_id: str,
+    planet_id: str,
+    reason: str,
+) -> None:
+    session.add(
+        RewardLedger(
+            user_id=user_id,
+            reward_type=PROMOCODE_SOURCE,
+            amount=0,
+            status="pending",
+            meta={"planet_id": planet_id, "reason": reason, "provider": "BE1"},
+        )
+    )
+
+
+async def add_small_star(
+    session: AsyncSession,
+    *,
+    user_id: str,
+    planet_id: str,
+    source: str,
+) -> PlanetState:
+    config = get_planet_config(planet_id)
+    if config is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Планета не найдена")
+
+    planet_state = await ensure_planet_state(session, user_id, planet_id, for_update=True)
+    constellation = get_constellation(config, planet_state.constellation_index)
+
+    planet_state.small_stars_current += 1
+    planet_state.small_stars_period_counter += 1
+    if source == "game":
+        planet_state.last_game_win_date = date.today()
+
+    if planet_state.small_stars_current >= constellation.small_stars_per_segment:
+        planet_state.small_stars_current = 0
+        planet_state.current_big_star += 1
+
+    if planet_state.current_big_star >= constellation.big_stars:
+        planet_state.current_big_star = 0
+        planet_state.small_stars_current = 0
+        planet_state.total_constellations_completed += 1
+        planet_state.constellation_index = min(
+            planet_state.constellation_index + 1,
+            len(config.constellations) - 1,
+        )
+        if planet_state.cashback_percent < config.cashback_max:
+            planet_state.cashback_percent = min(config.cashback_max, planet_state.cashback_percent + CASHBACK_INCREMENT)
+        planet_state.max_cashback_reached = planet_state.cashback_percent >= config.cashback_max
+        await issue_promocode_request(
+            session,
+            user_id=user_id,
+            planet_id=planet_id,
+            reason="constellation_completed",
+        )
+
+    session.add(
+        RewardLedger(
+            user_id=user_id,
+            reward_type="small_star",
+            amount=1,
+            status="confirmed",
+            meta={"planet_id": planet_id, "source": source},
+        )
+    )
+    await session.flush()
+    return planet_state
+
+
+async def apply_daily_degradation(session: AsyncSession, today: date | None = None) -> dict:
+    current_date = today or date.today()
+    threshold = current_date - timedelta(days=5)
+    states = (
+        await session.scalars(
+            select(PlanetState)
+            .where(PlanetState.last_game_win_date.is_not(None), PlanetState.last_game_win_date < threshold)
+            .with_for_update()
+        )
+    ).all()
+
+    degraded = 0
+    for state in states:
+        if state.small_stars_current > 0:
+            state.small_stars_current -= 1
+            degraded += 1
+        elif state.current_big_star > 0:
+            state.current_big_star -= 1
+            state.small_stars_current = 0
+            degraded += 1
+    await session.flush()
+    return {"status": "ok", "degraded_planets": degraded}
+
+
+async def apply_game_run(session: AsyncSession, *, user: User, game_code: str, score: int, planet_id: str | None = None) -> GameRun:
     if game_code not in GAME_PLANET_MAP:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Неизвестная игра")
     if score < 0:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Счет не может быть отрицательным")
 
     profile = await session.get(UserProfile, user.user_id)
-    planet_code = GAME_PLANET_MAP[game_code]
-    planet_state = await get_planet_state(session, user.user_id, planet_code)
+    planet_code = planet_id or GAME_PLANET_MAP[game_code]
+    if get_planet_config(planet_code) is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Планета не найдена")
+    if GAME_PLANET_MAP[game_code] != planet_code:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Игра не соответствует планете")
+    planet_state = await ensure_planet_state(session, user.user_id, planet_code, for_update=True)
     base_reward = get_game_base_reward(game_code, score)
     bonus = calculate_bonus(
         profile=profile,
@@ -294,6 +455,7 @@ async def apply_game_run(session: AsyncSession, *, user: User, game_code: str, s
     if game_code == GameCode.CREDIT_SHIELD_REACTOR.value:
         await update_quest_progress(session, user.user_id, "game_score_credit_shield", score)
     await update_quest_progress(session, user.user_id, "stardust_earned", bonus.total_reward)
+    await add_small_star(session, user_id=user.user_id, planet_id=planet_code, source="game")
     await refresh_rollup(session, user.user_id)
     await session.flush()
     return run

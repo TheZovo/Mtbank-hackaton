@@ -19,7 +19,7 @@ async def create_game_run(
     current_user=Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
 ) -> GameRunOut:
-    return await submit_game_run(session, current_user, game_code.value, payload.score)
+    return await submit_game_run(session, current_user, game_code.value, payload.score, payload.planet_id)
 
 
 @router.get("/summary", response_model=GameSummaryOut)
