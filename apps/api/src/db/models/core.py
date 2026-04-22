@@ -6,8 +6,8 @@ from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text, Uniqu
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from common.enums import BoosterStatus, PlanetCode, SegmentKey
-from db.base import Base, utcnow
 from core.security import generate_id
+from db.base import Base, utcnow
 
 
 class User(Base):
@@ -40,9 +40,16 @@ class UserProfile(Base):
     selected_planet: Mapped[str] = mapped_column(String(40), default=PlanetCode.ORBIT_COMMERCE.value)
     current_limit: Mapped[float] = mapped_column(Float, default=150.0)
     available_limit: Mapped[float] = mapped_column(Float, default=150.0)
-    risk_score: Mapped[int] = mapped_column(Integer, default=0)
+    risk_score: Mapped[int] = mapped_column(Integer, default=15)
     on_time_payments_3m: Mapped[int] = mapped_column(Integer, default=0)
     late_flags: Mapped[int] = mapped_column(Integer, default=0)
+    rating_score: Mapped[int] = mapped_column(Integer, default=320)
+    bank_rank: Mapped[str] = mapped_column(String(40), default="Bronze Voyager")
+    cashback_balance: Mapped[float] = mapped_column(Float, default=0)
+    bonus_points: Mapped[int] = mapped_column(Integer, default=0)
+    rating_boost: Mapped[int] = mapped_column(Integer, default=0)
+    total_stars: Mapped[int] = mapped_column(Integer, default=0)
+    completed_quests: Mapped[int] = mapped_column(Integer, default=0)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
     user = relationship("User", back_populates="profile")

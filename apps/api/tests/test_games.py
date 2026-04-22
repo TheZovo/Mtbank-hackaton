@@ -33,7 +33,8 @@ async def test_game_run_updates_summary_and_quest_progress(client) -> None:
     quests = await client.get("/v1/quests", headers=headers)
     orbit_quest = next(item for item in quests.json() if item["quest_id"] == "quest_orbit_001")
     assert orbit_quest["status"] == "completed"
+    assert orbit_quest["reward_kind"] == "cashback"
 
     claim = await client.post(f"/v1/quests/{orbit_quest['quest_id']}/claim", headers=headers)
     assert claim.status_code == 200
-    assert claim.json()["reward_type"] == "quest_booster"
+    assert claim.json()["reward_type"] == "quest_cashback"

@@ -7,6 +7,12 @@ class PlanetCode(StrEnum):
     SOCIAL_RING = "SOCIAL_RING"
 
 
+class ConstellationCode(StrEnum):
+    CASHBACK_COMET = "CASHBACK_COMET"
+    TRUST_ANCHOR = "TRUST_ANCHOR"
+    COMMUNITY_NOVA = "COMMUNITY_NOVA"
+
+
 class GameCode(StrEnum):
     HALVA_SNAKE = "halva_snake"
     CREDIT_SHIELD_REACTOR = "credit_shield_reactor"
@@ -36,4 +42,3 @@ class RewardStatus(StrEnum):
 
 class ReferralState(StrEnum):
     INVITED = "invited"
-

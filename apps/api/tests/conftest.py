@@ -15,7 +15,7 @@ async def test_app(tmp_path) -> AsyncIterator:
         env="test",
         database_url=f"sqlite+aiosqlite:///{tmp_path / 'test.db'}",
         redis_url="redis://localhost:6399/0",
-        jwt_secret="test-secret",
+        jwt_secret="test-secret-key-for-mtb-galaxy-suite",
         auto_create_schema=True,
         seed_defaults=True,
         otp_dev_bypass=True,

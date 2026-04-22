@@ -28,9 +28,13 @@ class GameSummaryItemOut(BaseModel):
     runs: int
     best_score: int
     total_reward: int
+    total_cashback: float
+    total_bonus_points: int
 
 
 class GameSummaryOut(BaseModel):
     total_runs: int
     total_reward: int
+    total_cashback: float
+    total_bonus_points: int
     games: list[GameSummaryItemOut]

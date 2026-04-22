@@ -4,7 +4,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
-from common.enums import PlanetCode, SegmentKey
+from common.enums import ConstellationCode, PlanetCode, SegmentKey
 
 
 class UserSummaryOut(BaseModel):
@@ -38,10 +38,13 @@ class QuestOut(BaseModel):
     title: str
     description: str
     planet_code: PlanetCode
+    category: str
     condition_type: str
     threshold: float
     reward_kind: str
     reward_value: float
+    reward_display: str
+    stars_reward: int
     status: str
     current_value: float
 
@@ -55,6 +58,8 @@ class RewardOut(BaseModel):
     status: str
     created_at: datetime
     meta: dict
+    title: str
+    description: str
 
 
 class ActivityOut(BaseModel):
@@ -76,6 +81,53 @@ class InstallmentProfileOut(BaseModel):
     late_flags: int
 
 
+class WalletOut(BaseModel):
+    cashback_balance: float
+    bonus_points: int
+    rating_boost: int
+    total_energy: int
+    vault_charge: int
+    vault_crates: int
+
+
+class RatingOverviewOut(BaseModel):
+    rating_score: int
+    bank_rank: str
+    total_stars: int
+    orbit_level: int
+    completed_quests: int
+
+
+class QuestSummaryOut(BaseModel):
+    active: int
+    completed: int
+    claimed: int
+
+
+class ConstellationOut(BaseModel):
+    constellation_code: ConstellationCode
+    title: str
+    theme: str
+    headline: str
+    accent: str
+    planet_code: PlanetCode
+    stars_filled: int
+    total_stars: int
+    completion_ratio: float
+    next_goal: str
+
+
+class LeaderboardEntryOut(BaseModel):
+    user_id: str
+    display_name: str
+    orbit_level: int
+    total_xp: int
+    rating_score: int
+    bank_rank: str
+    total_stars: int
+    cashback_balance: float
+
+
 class GalaxyProfileResponse(BaseModel):
     user: UserSummaryOut
     orbit_level: int
@@ -86,6 +138,10 @@ class GalaxyProfileResponse(BaseModel):
     vault_charge: int
     vault_crates: int
     selected_planet: PlanetCode
+    rating: RatingOverviewOut
+    wallet: WalletOut
+    quest_summary: QuestSummaryOut
+    constellations: list[ConstellationOut]
     planets: list[PlanetProgressOut]
     active_boosters: list[BoosterWindowOut]
     quests: list[QuestOut]

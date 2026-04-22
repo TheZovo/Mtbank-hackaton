@@ -32,4 +32,6 @@ async def test_referral_creates_invite_and_reward(client) -> None:
     assert len(referrals.json()) == 1
 
     rewards = await client.get("/v1/rewards/ledger", headers=headers)
-    assert any(item["reward_type"] == "referral_bonus" for item in rewards.json())
+    reward_types = {item["reward_type"] for item in rewards.json()}
+    assert "referral_cashback" in reward_types
+    assert "referral_bonus_points" in reward_types

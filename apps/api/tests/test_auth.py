@@ -33,3 +33,5 @@ async def test_auth_and_profile_flow(client) -> None:
     profile = await client.get("/v1/profile", headers=headers)
     assert profile.status_code == 200
     assert len(profile.json()["quests"]) >= 4
+    assert profile.json()["rating"]["rating_score"] >= 250
+    assert len(profile.json()["constellations"]) == 3

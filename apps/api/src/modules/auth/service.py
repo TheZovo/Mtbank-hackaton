@@ -25,7 +25,7 @@ from db.session import get_db_session, get_job_dispatcher, get_otp_store, get_se
 from infrastructure.cache.otp_store import OtpStoreRecord
 from modules.auth.schemas import AuthLoginResponse, AuthTokensResponse, RequestOtpResponse, VerifyOtpRequest
 from modules.profile.schemas import MeResponse, UserSummaryOut
-from modules.progression.service import provision_user
+from modules.progression.service import provision_user, record_login_progress
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
@@ -118,6 +118,7 @@ async def verify_otp_code(
     )
     challenge.consumed_at = utcnow()
     session.add(auth_session)
+    await record_login_progress(session, user)
     await session.commit()
     await session.refresh(auth_session)
     await otp_store.delete(challenge.challenge_id)
