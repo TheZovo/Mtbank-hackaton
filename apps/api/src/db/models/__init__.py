@@ -1,5 +1,5 @@
 from db.models.auth import AuthSession, OtpChallenge
-from db.models.core import ActivityLog, BoosterWindow, PlanetState, User, UserProfile
+from db.models.core import ActivityLog, BoosterWindow, LeaderboardPeriod, MccToPlanet, PlanetState, User, UserProfile
 from db.models.game_attempts import GameAttempt
 from db.models.games import GameRun
 from db.models.promocodes import PromoCode
@@ -13,6 +13,8 @@ __all__ = [
     "BoosterWindow",
     "GameAttempt",
     "GameRun",
+    "LeaderboardPeriod",
+    "MccToPlanet",
     "OtpChallenge",
     "PlanetState",
     "PromoCode",

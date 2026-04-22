@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     otp_ttl_seconds: int = 300
     otp_max_attempts: int = 5
     otp_dev_bypass: bool = True
+    internal_api_key: str | None = None
     cors_origins: list[str] = ["http://localhost:8081"]
     auto_create_schema: bool = False
     seed_defaults: bool = False

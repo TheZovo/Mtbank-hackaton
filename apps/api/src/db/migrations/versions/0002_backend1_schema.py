@@ -137,7 +137,7 @@ def _sync_planet_states() -> None:
         ),
         (
             "constellation_index",
-            sa.Column("constellation_index", sa.Integer(), nullable=False, server_default=sa.text("1")),
+            sa.Column("constellation_index", sa.Integer(), nullable=False, server_default=sa.text("0")),
         ),
         (
             "small_stars_period_counter",
@@ -149,7 +149,7 @@ def _sync_planet_states() -> None:
         ),
         (
             "cashback_percent",
-            sa.Column("cashback_percent", sa.Float(), nullable=False, server_default=sa.text("2.5")),
+            sa.Column("cashback_percent", sa.Float(), nullable=False, server_default=sa.text("1.0")),
         ),
         (
             "max_cashback_reached",

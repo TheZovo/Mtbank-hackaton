@@ -5,8 +5,8 @@ from datetime import datetime
 from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from db.base import Base, utcnow
 from core.security import generate_id
+from db.base import Base, utcnow
 
 
 class GameRun(Base):

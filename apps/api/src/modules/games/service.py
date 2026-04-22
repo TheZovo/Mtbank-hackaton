@@ -1,17 +1,41 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from datetime import date
 
+from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db.models import GameRun, User
+from db.models import GameAttempt, GameRun, User
 from modules.games.schemas import GameRunOut, GameSummaryItemOut, GameSummaryOut
+from modules.planets.config import DAILY_GAME_ATTEMPT_LIMIT
+from modules.planets.service import build_planet_progress
 from modules.progression.service import apply_game_run
 
 
-async def submit_game_run(session: AsyncSession, user: User, game_code: str, score: int) -> GameRunOut:
-    run = await apply_game_run(session, user=user, game_code=game_code, score=score)
+async def consume_daily_attempt(session: AsyncSession, user_id: str) -> GameAttempt:
+    today = date.today()
+    attempt = await session.scalar(
+        select(GameAttempt)
+        .where(GameAttempt.user_id == user_id, GameAttempt.date == today)
+        .with_for_update()
+    )
+    if attempt is None:
+        attempt = GameAttempt(user_id=user_id, date=today, attempts_used=0)
+        session.add(attempt)
+        await session.flush()
+    if attempt.attempts_used >= DAILY_GAME_ATTEMPT_LIMIT:
+        raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="Daily attempt limit reached")
+    attempt.attempts_used += 1
+    await session.flush()
+    return attempt
+
+
+async def submit_game_run(session: AsyncSession, user: User, game_code: str, score: int, planet_id: str | None) -> GameRunOut:
+    attempt = await consume_daily_attempt(session, user.user_id)
+    run = await apply_game_run(session, user=user, game_code=game_code, score=score, planet_id=planet_id)
+    planet_progress = await build_planet_progress(session, user, run.planet_code)
     await session.commit()
     await session.refresh(run)
     return GameRunOut(
@@ -22,6 +46,9 @@ async def submit_game_run(session: AsyncSession, user: User, game_code: str, sco
         base_reward=run.base_reward,
         total_reward=run.total_reward,
         bonus_breakdown=run.bonus_breakdown,
+        small_star_awarded=True,
+        remaining_attempts_today=max(DAILY_GAME_ATTEMPT_LIMIT - attempt.attempts_used, 0),
+        planet_progress=planet_progress,
         created_at=run.created_at,
     )
 
