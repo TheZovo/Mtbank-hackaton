@@ -12,9 +12,12 @@ from core.security import generate_id
 class Referral(Base):
     __tablename__ = "referrals"
 
-    referral_id: Mapped[str] = mapped_column(String(40), primary_key=True, default=lambda: generate_id("ref"))
-    inviter_user_id: Mapped[str] = mapped_column(ForeignKey("users.user_id", ondelete="CASCADE"), index=True)
-    invitee_phone: Mapped[str] = mapped_column(String(20))
-    state: Mapped[str] = mapped_column(String(20), default="invited")
-    invite_code: Mapped[str] = mapped_column(String(20), unique=True)
+    referral_id: Mapped[str] = mapped_column("id", String(40), primary_key=True, default=lambda: generate_id("ref"))
+    inviter_user_id: Mapped[str] = mapped_column(
+        "inviter_id",
+        ForeignKey("users.user_id", ondelete="CASCADE"),
+        index=True,
+    )
+    invitee_phone: Mapped[str] = mapped_column("invited_phone", String(20))
+    status: Mapped[str] = mapped_column(String(20), default="invited")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

@@ -5,24 +5,24 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.session import get_db_session
 from modules.auth.service import get_current_user
-from modules.referrals.schemas import ReferralCreateRequest, ReferralOut
+from modules.referrals.schemas import ReferralCreateRequest, ReferralCreateResponse, ReferralListResponse
 from modules.referrals.service import create_referral, list_referrals
 
 router = APIRouter(prefix="/referrals", tags=["referrals"])
 
 
-@router.get("", response_model=list[ReferralOut])
+@router.get("", response_model=ReferralListResponse)
 async def get_referrals(
     current_user=Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
-) -> list[ReferralOut]:
+) -> ReferralListResponse:
     return await list_referrals(session, current_user)
 
 
-@router.post("", response_model=ReferralOut)
+@router.post("", response_model=ReferralCreateResponse)
 async def create_referral_invite(
     payload: ReferralCreateRequest,
     current_user=Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
-) -> ReferralOut:
-    return await create_referral(session, current_user, payload.invitee_phone)
+) -> ReferralCreateResponse:
+    return await create_referral(session, current_user, payload.phone or "")

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import asdict
-from datetime import timedelta
+from datetime import date, timedelta
 from math import floor, sqrt
 
 from fastapi import HTTPException, status
@@ -11,7 +11,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from common.enums import ConstellationCode, GameCode, PlanetCode, QuestStatus, SegmentKey
 from core.security import BonusBreakdown, generate_id, make_display_name, utcnow
-from db.models import ActivityLog, BoosterWindow, GameRun, PlanetState, Quest, QuestProgress, Referral, RewardLedger, User, UserProfile
+from db.models import (
+    ActivityLog,
+    BoosterWindow,
+    GameAttempt,
+    GameRun,
+    PlanetState,
+    Quest,
+    QuestProgress,
+    Referral,
+    RewardLedger,
+    User,
+    UserProfile,
+)
 
 
 PLANET_WEIGHTS = {
@@ -490,6 +502,9 @@ async def provision_user(
             existing.display_name = display_name
         if segment and existing.segment != segment.value:
             existing.segment = segment.value
+        profile = await session.get(UserProfile, existing.user_id)
+        if profile is not None and not profile.focus_planet_id:
+            profile.focus_planet_id = profile.selected_planet
         await seed_quest_catalog(session)
         await ensure_quest_progress(session, existing.user_id)
         await refresh_rollup(session, existing.user_id)
@@ -504,7 +519,13 @@ async def provision_user(
     session.add(user)
     await session.flush()
 
-    session.add(UserProfile(user_id=user.user_id))
+    session.add(
+        UserProfile(
+            user_id=user.user_id,
+            focus_planet_id=PlanetCode.ORBIT_COMMERCE.value,
+            selected_planet=PlanetCode.ORBIT_COMMERCE.value,
+        )
+    )
     for planet_code in PlanetCode:
         session.add(PlanetState(user_id=user.user_id, planet_code=planet_code.value))
     await seed_quest_catalog(session)
@@ -535,6 +556,67 @@ async def record_login_progress(session: AsyncSession, user: User) -> None:
         )
     )
     await refresh_rollup(session, user.user_id)
+
+
+async def add_small_star(
+    session: AsyncSession,
+    *,
+    user_id: str,
+    planet_id: str,
+    source: str = "system",
+) -> PlanetState:
+    planet_state = await get_planet_state(session, user_id, planet_id)
+    planet_state.small_stars_current += 1
+    planet_state.small_stars_period_counter += 1
+    if source == "game":
+        planet_state.last_game_win_date = date.today()
+    await session.flush()
+    return planet_state
+
+
+async def apply_referral_invite_effects(session: AsyncSession, *, user: User, invitee_phone: str) -> None:
+    profile = await session.get(UserProfile, user.user_id)
+    planet_state = await get_planet_state(session, user.user_id, PlanetCode.SOCIAL_RING.value)
+
+    cashback_gain = 6.0
+    bonus_points_gain = 90
+    profile.cashback_balance = round(profile.cashback_balance + cashback_gain, 1)
+    profile.bonus_points += bonus_points_gain
+    profile.total_energy += 6
+    planet_state.xp += 32
+    planet_state.level = level_from_xp(planet_state.xp)
+
+    session.add(
+        RewardLedger(
+            user_id=user.user_id,
+            reward_type="referral_cashback",
+            amount=cashback_gain,
+            status="confirmed",
+            meta={"invitee_phone": invitee_phone},
+        )
+    )
+    session.add(
+        RewardLedger(
+            user_id=user.user_id,
+            reward_type="referral_bonus_points",
+            amount=bonus_points_gain,
+            status="confirmed",
+            meta={"invitee_phone": invitee_phone},
+        )
+    )
+    session.add(
+        ActivityLog(
+            user_id=user.user_id,
+            title="Referral invite sent",
+            detail=f"Invite sent to {invitee_phone}. Cashback and loyalty points added to the wallet.",
+            reward=int(cashback_gain),
+            planet_code=PlanetCode.SOCIAL_RING.value,
+        )
+    )
+    await update_quest_progress(session, user.user_id, "referral_invites", 1)
+    await update_quest_progress(session, user.user_id, "stardust_earned", 6)
+    await refresh_rollup(session, user.user_id)
+    await session.flush()
 
 
 async def apply_game_run(session: AsyncSession, *, user: User, game_code: str, score: int) -> GameRun:
@@ -571,6 +653,13 @@ async def apply_game_run(session: AsyncSession, *, user: User, game_code: str, s
     planet_state.xp += xp_gain
     planet_state.level = level_from_xp(planet_state.xp)
     planet_state.mastery = bonus.next_mastery
+    planet_state.last_game_win_date = date.today()
+
+    attempts = await session.get(GameAttempt, (user.user_id, date.today()))
+    if attempts is None:
+        attempts = GameAttempt(user_id=user.user_id, attempt_date=date.today(), attempts_used=0)
+        session.add(attempts)
+    attempts.attempts_used += 1
 
     run = GameRun(
         user_id=user.user_id,
@@ -715,49 +804,8 @@ async def create_referral_reward(session: AsyncSession, *, user: User, invitee_p
     referral = Referral(
         inviter_user_id=user.user_id,
         invitee_phone=invitee_phone,
-        invite_code=generate_id("invite").split("_", maxsplit=1)[1].upper(),
+        status="invited",
     )
-    profile = await session.get(UserProfile, user.user_id)
-    planet_state = await get_planet_state(session, user.user_id, PlanetCode.SOCIAL_RING.value)
-
-    cashback_gain = 6.0
-    bonus_points_gain = 90
-    profile.cashback_balance = round(profile.cashback_balance + cashback_gain, 1)
-    profile.bonus_points += bonus_points_gain
-    profile.total_energy += 6
-    planet_state.xp += 32
-    planet_state.level = level_from_xp(planet_state.xp)
-
     session.add(referral)
-    session.add(
-        RewardLedger(
-            user_id=user.user_id,
-            reward_type="referral_cashback",
-            amount=cashback_gain,
-            status="confirmed",
-            meta={"invitee_phone": invitee_phone},
-        )
-    )
-    session.add(
-        RewardLedger(
-            user_id=user.user_id,
-            reward_type="referral_bonus_points",
-            amount=bonus_points_gain,
-            status="confirmed",
-            meta={"invitee_phone": invitee_phone},
-        )
-    )
-    session.add(
-        ActivityLog(
-            user_id=user.user_id,
-            title="Referral invite sent",
-            detail=f"Invite sent to {invitee_phone}. Cashback and loyalty points added to the wallet.",
-            reward=int(cashback_gain),
-            planet_code=PlanetCode.SOCIAL_RING.value,
-        )
-    )
-    await update_quest_progress(session, user.user_id, "referral_invites", 1)
-    await update_quest_progress(session, user.user_id, "stardust_earned", 6)
-    await refresh_rollup(session, user.user_id)
-    await session.flush()
+    await apply_referral_invite_effects(session, user=user, invitee_phone=invitee_phone)
     return referral

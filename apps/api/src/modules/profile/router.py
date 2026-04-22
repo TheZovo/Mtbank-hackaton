@@ -28,5 +28,6 @@ async def set_focus_planet(
 ) -> GalaxyProfileResponse:
     profile = await session.get(UserProfile, current_user.user_id)
     profile.selected_planet = payload.planet_code.value
+    profile.focus_planet_id = payload.planet_code.value
     await session.commit()
     return await build_profile_response(session, current_user)

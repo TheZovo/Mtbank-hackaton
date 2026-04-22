@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, computed_field
 
 from common.enums import ConstellationCode, PlanetCode, SegmentKey
 
@@ -15,6 +15,16 @@ class UserSummaryOut(BaseModel):
     display_name: str
     segment: SegmentKey
     created_at: datetime
+
+    @computed_field(return_type=str)
+    @property
+    def id(self) -> str:
+        return self.user_id
+
+    @computed_field(return_type=str)
+    @property
+    def name(self) -> str:
+        return self.display_name
 
 
 class PlanetProgressOut(BaseModel):
@@ -155,5 +165,10 @@ class FocusPlanetRequest(BaseModel):
 
 
 class MeResponse(BaseModel):
+    id: str
+    phone: str
+    name: str
+    daily_game_attempts_used: int
+    daily_game_attempts_limit: int
     user: UserSummaryOut
     selected_planet: PlanetCode

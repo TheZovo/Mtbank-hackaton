@@ -14,6 +14,7 @@ from modules.auth.router import router as auth_router
 from modules.devtools.seed import seed_defaults
 from modules.games.router import router as games_router
 from modules.leaderboard.router import router as leaderboard_router
+from modules.promocodes.router import router as promocodes_router
 from modules.profile.router import router as profile_router
 from modules.quests.router import router as quests_router
 from modules.referrals.router import router as referrals_router
@@ -54,6 +55,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(auth_router, prefix=api)
     app.include_router(users_router, prefix=api)
     app.include_router(profile_router, prefix=api)
+    app.include_router(promocodes_router, prefix=api)
     app.include_router(quests_router, prefix=api)
     app.include_router(rewards_router, prefix=api)
     app.include_router(referrals_router, prefix=api)

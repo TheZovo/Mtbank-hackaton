@@ -26,7 +26,7 @@ class AuthSession(Base):
 
     session_id: Mapped[str] = mapped_column(String(40), primary_key=True, default=lambda: generate_id("ses"))
     user_id: Mapped[str] = mapped_column(ForeignKey("users.user_id", ondelete="CASCADE"), index=True)
-    refresh_token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    refresh_token_hash: Mapped[str] = mapped_column(String(255))
     user_agent: Mapped[str | None] = mapped_column(String(255), nullable=True)
     device_name: Mapped[str | None] = mapped_column(String(120), nullable=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))

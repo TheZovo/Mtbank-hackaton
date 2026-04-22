@@ -13,7 +13,13 @@ from modules.auth.schemas import (
     RequestOtpResponse,
     VerifyOtpRequest,
 )
-from modules.auth.service import refresh_auth_tokens, request_otp_code, revoke_refresh_session, verify_otp_code
+from modules.auth.service import (
+    get_current_auth_session,
+    refresh_auth_tokens,
+    request_otp_code,
+    revoke_refresh_session,
+    verify_otp_code,
+)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -63,8 +69,13 @@ async def refresh_tokens(
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 async def logout(
-    payload: LogoutRequest,
+    payload: LogoutRequest | None = None,
+    auth_session=Depends(get_current_auth_session),
     session: AsyncSession = Depends(get_db_session),
 ) -> Response:
-    await revoke_refresh_session(refresh_token=payload.refresh_token, session=session)
+    await revoke_refresh_session(
+        session=session,
+        auth_session_id=auth_session.session_id,
+        refresh_token=(payload.refresh_token if payload is not None else None),
+    )
     return Response(status_code=status.HTTP_204_NO_CONTENT)
