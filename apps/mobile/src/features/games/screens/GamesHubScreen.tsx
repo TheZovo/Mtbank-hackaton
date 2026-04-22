@@ -1,58 +1,63 @@
-import { useQuery } from "@tanstack/react-query";
 import { useNavigation } from "@react-navigation/native";
-import { GAME_META } from "@mtb/shared";
-import { Text, View } from "react-native";
-import { getGameSummary } from "../../../shared/api/client";
-import { LoadingView } from "../../../shared/ui/LoadingView";
+import { StyleSheet, Text, View } from "react-native";
+import { colors } from "../../../shared/theme/colors";
 import { PrimaryButton } from "../../../shared/ui/PrimaryButton";
 import { Screen } from "../../../shared/ui/Screen";
 import { SectionCard } from "../../../shared/ui/SectionCard";
+import { StarIcon } from "../../../shared/ui/StarIcon";
+
+const games = [
+  {
+    id: "SnakeGame",
+    title: "Змейка Халва",
+    subtitle: "Аркадный режим для фарма попыток, вовлечения и прогресса по ежедневной игровой петле.",
+    planet: "Аптеки",
+  },
+  {
+    id: "ShieldGame",
+    title: "Реактор щита",
+    subtitle: "Игра на тайминг и точность. Подходит для демонстрации второго сценария игрового модуля.",
+    planet: "АЗС",
+  },
+  {
+    id: "SocialGame",
+    title: "Сигнальный ринг",
+    subtitle: "Мини-игра на память и ритм. Показывает, как FE1 встраивает общую навигацию поверх игровых экранов.",
+    planet: "Маркетплейсы",
+  },
+] as const;
 
 export function GamesHubScreen() {
   const navigation = useNavigation<any>();
-  const summaryQuery = useQuery({
-    queryKey: ["game-summary"],
-    queryFn: getGameSummary,
-  });
-
-  if (summaryQuery.isLoading || !summaryQuery.data) {
-    return <LoadingView />;
-  }
 
   return (
     <Screen
-      title="Mini-games"
-      subtitle="Each run feeds the real banking progression: stardust, cashback, loyalty points, stars and user rating."
+      title="Игровой хаб"
+      subtitle="FE1 подключает общий вход в игровой модуль и оставляет все сценарии доступными из таб-навигации. Результаты игр отправляются на мок-сервер."
     >
-      {Object.entries(GAME_META).map(([gameCode, meta]) => {
-        const summary = summaryQuery.data.games.find((item) => item.game_code === gameCode);
-        return (
-          <SectionCard key={gameCode} title={meta.title} description={meta.description}>
-            <View style={{ gap: 4 }}>
-              <Text style={{ color: "#9DB6C9" }}>Planet: {meta.planetCode}</Text>
-              <Text style={{ color: "#9DB6C9" }}>
-                Runs {summary?.runs ?? 0} • Best {summary?.best_score ?? 0} • Stardust {summary?.total_reward ?? 0}
-              </Text>
-              <Text style={{ color: "#9DB6C9" }}>
-                Cashback {summary?.total_cashback?.toFixed(1) ?? "0.0"} BYN • Points {summary?.total_bonus_points ?? 0}
-              </Text>
-            </View>
-            <PrimaryButton
-              onPress={() =>
-                navigation.navigate(
-                  gameCode === "halva_snake"
-                    ? "SnakeGame"
-                    : gameCode === "credit_shield_reactor"
-                      ? "ShieldGame"
-                      : "SocialGame",
-                )
-              }
-            >
-              Open game
-            </PrimaryButton>
-          </SectionCard>
-        );
-      })}
+      {games.map((game) => (
+        <SectionCard key={game.id} description={game.subtitle} title={game.title}>
+          <View style={styles.metaRow}>
+            <StarIcon color={colors.warning} size={18} />
+            <Text style={styles.metaText}>Связано с планетой: {game.planet}</Text>
+          </View>
+          <PrimaryButton onPress={() => navigation.navigate(game.id)}>Открыть игру</PrimaryButton>
+        </SectionCard>
+      ))}
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  metaRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+  },
+  metaText: {
+    color: colors.textMuted,
+    flex: 1,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+});

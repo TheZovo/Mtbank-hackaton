@@ -7,10 +7,11 @@ import { ShieldGameScreen } from "../features/games/screens/ShieldGameScreen";
 import { SnakeGameScreen } from "../features/games/screens/SnakeGameScreen";
 import { SocialGameScreen } from "../features/games/screens/SocialGameScreen";
 import { LeaderboardScreen } from "../features/leaderboard/screens/LeaderboardScreen";
+import { PlanetsMapScreen } from "../features/planets/screens/PlanetsMapScreen";
 import { ProfileScreen } from "../features/profile/screens/ProfileScreen";
-import { QuestsScreen } from "../features/quests/screens/QuestsScreen";
 import { ReferralsScreen } from "../features/referrals/screens/ReferralsScreen";
-import { RewardsScreen } from "../features/rewards/screens/RewardsScreen";
+import { BrandTabBar } from "./BrandTabBar";
+import { useSessionBootstrap } from "../shared/hooks/useSessionBootstrap";
 import { useSessionStore } from "../shared/state/session-store";
 import { colors } from "../shared/theme/colors";
 import { LoadingView } from "../shared/ui/LoadingView";
@@ -23,17 +24,14 @@ function AppTabs() {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textMuted,
       }}
+      tabBar={(props) => <BrandTabBar {...props} />}
     >
-      <Tab.Screen name="Profile" component={ProfileScreen} />
-      <Tab.Screen name="Quests" component={QuestsScreen} />
-      <Tab.Screen name="Rewards" component={RewardsScreen} />
-      <Tab.Screen name="Referrals" component={ReferralsScreen} />
-      <Tab.Screen name="Rating" component={LeaderboardScreen} />
-      <Tab.Screen name="Games" component={GamesHubScreen} />
+      <Tab.Screen name="PlanetsMap" component={PlanetsMapScreen} options={{ title: "Планеты" }} />
+      <Tab.Screen name="GamesHub" component={GamesHubScreen} options={{ title: "Игры" }} />
+      <Tab.Screen name="Leaderboard" component={LeaderboardScreen} options={{ title: "Рейтинг" }} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: "Профиль" }} />
+      <Tab.Screen name="Referrals" component={ReferralsScreen} options={{ title: "Рефералы" }} />
     </Tab.Navigator>
   );
 }
@@ -51,10 +49,11 @@ const navigationTheme = {
 };
 
 export function RootNavigator() {
+  useSessionBootstrap();
   const status = useSessionStore((state) => state.status);
 
   if (status === "hydrating") {
-    return <LoadingView />;
+    return <LoadingView label="Восстанавливаем сессию..." />;
   }
 
   return (
@@ -65,12 +64,14 @@ export function RootNavigator() {
             contentStyle: { backgroundColor: colors.background },
             headerStyle: { backgroundColor: colors.surface },
             headerTintColor: colors.text,
+            headerShadowVisible: false,
+            headerTitleStyle: { fontWeight: "700" },
           }}
         >
           <RootStack.Screen name="Tabs" component={AppTabs} options={{ headerShown: false }} />
-          <RootStack.Screen name="SnakeGame" component={SnakeGameScreen} options={{ title: "Halva Snake" }} />
-          <RootStack.Screen name="ShieldGame" component={ShieldGameScreen} options={{ title: "Credit Shield Reactor" }} />
-          <RootStack.Screen name="SocialGame" component={SocialGameScreen} options={{ title: "Social Ring Signal" }} />
+          <RootStack.Screen name="SnakeGame" component={SnakeGameScreen} options={{ title: "Змейка Халва" }} />
+          <RootStack.Screen name="ShieldGame" component={ShieldGameScreen} options={{ title: "Реактор щита" }} />
+          <RootStack.Screen name="SocialGame" component={SocialGameScreen} options={{ title: "Сигнальный ринг" }} />
         </RootStack.Navigator>
       ) : (
         <RootStack.Navigator screenOptions={{ headerShown: false }}>

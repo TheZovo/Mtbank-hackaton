@@ -3,8 +3,9 @@ import { StyleSheet, Text, View } from "react-native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Direction, advanceSnake, createInitialSnakeState, queueDirection } from "@mtb/game-core";
 import { submitGameRun } from "../../../shared/api/client";
-import { Screen } from "../../../shared/ui/Screen";
+import { colors } from "../../../shared/theme/colors";
 import { PrimaryButton } from "../../../shared/ui/PrimaryButton";
+import { Screen } from "../../../shared/ui/Screen";
 import { SecondaryButton } from "../../../shared/ui/SecondaryButton";
 import { SectionCard } from "../../../shared/ui/SectionCard";
 
@@ -22,11 +23,12 @@ export function SnakeGameScreen() {
     mutationFn: () => submitGameRun("halva_snake", { score: game.score }),
     onSuccess: (payload) => {
       setHasSubmitted(true);
-      setStatus(`Раунд отправлен: +${payload.total_reward} звездной пыли.`);
+      setStatus(`Раунд отправлен: +${payload.total_reward} к прогрессу.`);
       void Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["profile"] }),
-        queryClient.invalidateQueries({ queryKey: ["rewards"] }),
-        queryClient.invalidateQueries({ queryKey: ["quests"] }),
+        queryClient.invalidateQueries({ queryKey: ["me"] }),
+        queryClient.invalidateQueries({ queryKey: ["promocodes"] }),
+        queryClient.invalidateQueries({ queryKey: ["planets-list"] }),
+        queryClient.invalidateQueries({ queryKey: ["planet-leaderboard"] }),
         queryClient.invalidateQueries({ queryKey: ["game-summary"] }),
       ]);
     },
@@ -44,7 +46,7 @@ export function SnakeGameScreen() {
 
   useEffect(() => {
     if (game.isOver) {
-      setStatus("Забег завершен. Можно отправить результат на сервер.");
+      setStatus("Забег завершён. Теперь можно отправить результат на сервер.");
       setIsStarted(false);
       setIsPaused(false);
     }
@@ -74,19 +76,19 @@ export function SnakeGameScreen() {
     setIsStarted(false);
     setIsPaused(false);
     setHasSubmitted(false);
-    setStatus("Поле сброшено. Готово к новому забегу.");
+    setStatus("Поле сброшено. Можно начинать новый забег.");
   }
 
   return (
     <Screen
       title="Змейка Халва"
-      subtitle="Touch-native ран с отправкой итогового счета в `/v1/games/halva_snake/runs`."
+      subtitle="Небольшая аркада для мобильного клиента. После завершения результат уходит в `/v1/games/halva_snake/runs`."
       footer={
-        <View style={{ gap: 12 }}>
-          <PrimaryButton onPress={() => setIsStarted(true)} disabled={game.isOver || isStarted}>
+        <View style={styles.footer}>
+          <PrimaryButton disabled={game.isOver || isStarted} onPress={() => setIsStarted(true)}>
             Старт
           </PrimaryButton>
-          <SecondaryButton onPress={() => setIsPaused((value) => !value)} disabled={!isStarted || game.isOver}>
+          <SecondaryButton disabled={!isStarted || game.isOver} onPress={() => setIsPaused((value) => !value)}>
             {isPaused ? "Продолжить" : "Пауза"}
           </SecondaryButton>
           <SecondaryButton onPress={resetGame}>Сбросить</SecondaryButton>
@@ -100,8 +102,8 @@ export function SnakeGameScreen() {
       }
     >
       <SectionCard title="Статус">
-        <Text style={styles.metaText}>Счет: {game.score}</Text>
-        <Text style={styles.metaText}>Скорость: {speed}ms</Text>
+        <Text style={styles.metaText}>Счёт: {game.score}</Text>
+        <Text style={styles.metaText}>Скорость: {speed} мс</Text>
         <Text style={styles.metaText}>{status}</Text>
       </SectionCard>
       <SectionCard title="Поле">
@@ -135,8 +137,11 @@ export function SnakeGameScreen() {
 }
 
 const styles = StyleSheet.create({
+  footer: {
+    gap: 12,
+  },
   metaText: {
-    color: "#9DB6C9",
+    color: colors.textMuted,
   },
   grid: {
     flexDirection: "row",
@@ -144,16 +149,16 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   cell: {
-    backgroundColor: "#0D1B2A",
+    backgroundColor: colors.surface,
     borderRadius: 4,
     height: 22,
     width: 22,
   },
   snakeCell: {
-    backgroundColor: "#FF7A59",
+    backgroundColor: colors.primary,
   },
   foodCell: {
-    backgroundColor: "#14B8A6",
+    backgroundColor: colors.success,
   },
   controlsRow: {
     flexDirection: "row",

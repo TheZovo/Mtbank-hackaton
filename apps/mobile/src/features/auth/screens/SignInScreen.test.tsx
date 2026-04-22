@@ -1,9 +1,10 @@
 import { fireEvent, render, waitFor } from "@testing-library/react-native";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SignInScreen } from "./SignInScreen";
 
-const requestOtpMock = jest.fn();
-const verifyOtpMock = jest.fn();
-const setSessionMock = jest.fn();
+const mockRequestOtp = jest.fn();
+const mockVerifyOtp = jest.fn();
+const mockSetSession = jest.fn();
 
 jest.mock("react-native-safe-area-context", () => {
   const React = require("react");
@@ -15,65 +16,67 @@ jest.mock("react-native-safe-area-context", () => {
 });
 
 jest.mock("../../../shared/api/client", () => ({
-  requestOtp: (...args: unknown[]) => requestOtpMock(...args),
-  verifyOtp: (...args: unknown[]) => verifyOtpMock(...args),
+  requestOtp: (...args: unknown[]) => mockRequestOtp(...args),
+  verifyOtp: (...args: unknown[]) => mockVerifyOtp(...args),
 }));
 
 jest.mock("../../../shared/state/session-store", () => ({
-  useSessionStore: (selector: (state: { setSession: typeof setSessionMock }) => unknown) =>
-    selector({ setSession: setSessionMock }),
+  useSessionStore: (selector: (state: { setSession: typeof mockSetSession }) => unknown) =>
+    selector({ setSession: mockSetSession }),
 }));
 
 describe("SignInScreen", () => {
   beforeEach(() => {
-    requestOtpMock.mockReset();
-    verifyOtpMock.mockReset();
-    setSessionMock.mockReset();
+    mockRequestOtp.mockReset();
+    mockVerifyOtp.mockReset();
+    mockSetSession.mockReset();
   });
 
   it("requests otp and completes login flow", async () => {
-    requestOtpMock.mockResolvedValue({
-      challenge_id: "otp_123",
-      expires_in_seconds: 300,
-      dev_code: "123456",
+    mockRequestOtp.mockResolvedValue({
+      message: "OTP sent",
+      dev_otp: "123456",
     });
-    verifyOtpMock.mockResolvedValue({
+    mockVerifyOtp.mockResolvedValue({
       access_token: "access",
       refresh_token: "refresh",
-      token_type: "bearer",
-      expires_in_seconds: 1800,
       user: {
-        user_id: "usr_1",
-        phone: "+19991234567",
-        display_name: "Test Pilot",
-        segment: "student",
-        created_at: new Date().toISOString(),
-      },
-      me: {
-        user: {
-          user_id: "usr_1",
-          phone: "+19991234567",
-          display_name: "Test Pilot",
-          segment: "student",
-          created_at: new Date().toISOString(),
-        },
-        selected_planet: "ORBIT_COMMERCE",
+        id: "usr_1",
+        phone: "+375290001122",
+        name: "Test Pilot",
       },
     });
-    setSessionMock.mockResolvedValue(undefined);
+    mockSetSession.mockResolvedValue(undefined);
 
-    const screen = render(<SignInScreen />);
-    fireEvent.changeText(screen.getByPlaceholderText("+1 999 123 45 67"), "+19991234567");
-    fireEvent.changeText(screen.getByPlaceholderText("Например, Pilot Roman"), "Test Pilot");
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        mutations: { gcTime: Infinity, retry: false },
+        queries: { gcTime: Infinity, retry: false },
+      },
+    });
+    const screen = render(
+      <QueryClientProvider client={queryClient}>
+        <SignInScreen />
+      </QueryClientProvider>,
+    );
+    fireEvent.changeText(screen.getByPlaceholderText("+375 29 000 00 00"), "+375290001122");
+    fireEvent.changeText(screen.getByPlaceholderText("Например, Алина"), "Test Pilot");
     fireEvent.press(screen.getByText("Получить OTP"));
 
-    await waitFor(() => expect(requestOtpMock).toHaveBeenCalled());
+    await waitFor(() => expect(mockRequestOtp).toHaveBeenCalledWith({ phone: "+375290001122" }));
     expect(screen.getByText("Dev OTP: 123456")).toBeTruthy();
 
-    fireEvent.changeText(screen.getByPlaceholderText("000000"), "123456");
+    fireEvent.changeText(screen.getByPlaceholderText("123456"), "123456");
     fireEvent.press(screen.getByText("Войти в приложение"));
 
-    await waitFor(() => expect(verifyOtpMock).toHaveBeenCalled());
-    await waitFor(() => expect(setSessionMock).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(mockVerifyOtp).toHaveBeenCalledWith({
+        code: "123456",
+        name: "Test Pilot",
+        phone: "+375290001122",
+      }),
+    );
+    await waitFor(() => expect(mockSetSession).toHaveBeenCalled());
+    queryClient.clear();
   });
 });
