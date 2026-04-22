@@ -3,10 +3,12 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SignInScreen } from "../features/auth/screens/SignInScreen";
 import { GamesHubScreen } from "../features/games/screens/GamesHubScreen";
+import { GameScreen } from "../features/games/screens/GameScreen";
 import { ShieldGameScreen } from "../features/games/screens/ShieldGameScreen";
 import { SnakeGameScreen } from "../features/games/screens/SnakeGameScreen";
 import { SocialGameScreen } from "../features/games/screens/SocialGameScreen";
 import { LeaderboardScreen } from "../features/leaderboard/screens/LeaderboardScreen";
+import { PlanetDetailScreen } from "../features/planets/screens/PlanetDetailScreen";
 import { PlanetsMapScreen } from "../features/planets/screens/PlanetsMapScreen";
 import { ProfileScreen } from "../features/profile/screens/ProfileScreen";
 import { ReferralsScreen } from "../features/referrals/screens/ReferralsScreen";
@@ -69,6 +71,8 @@ export function RootNavigator() {
           }}
         >
           <RootStack.Screen name="Tabs" component={AppTabs} options={{ headerShown: false }} />
+          <RootStack.Screen name="PlanetDetail" component={PlanetDetailScreen} options={{ headerShown: false }} />
+          <RootStack.Screen name="Game" component={GameScreen} options={{ headerShown: false }} />
           <RootStack.Screen name="SnakeGame" component={SnakeGameScreen} options={{ title: "Змейка Халва" }} />
           <RootStack.Screen name="ShieldGame" component={ShieldGameScreen} options={{ title: "Реактор щита" }} />
           <RootStack.Screen name="SocialGame" component={SocialGameScreen} options={{ title: "Сигнальный ринг" }} />

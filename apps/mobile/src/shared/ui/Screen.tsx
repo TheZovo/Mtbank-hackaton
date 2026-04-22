@@ -1,4 +1,5 @@
 import type { PropsWithChildren, ReactNode } from "react";
+import type { ScrollViewProps } from "react-native";
 import { KeyboardAvoidingView, Platform, ScrollView, StatusBar, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "../theme/colors";
@@ -7,14 +8,21 @@ interface ScreenProps extends PropsWithChildren {
   title: string;
   subtitle?: string;
   footer?: ReactNode;
+  scrollViewProps?: ScrollViewProps;
 }
 
-export function Screen({ children, footer, subtitle, title }: ScreenProps) {
+export function Screen({ children, footer, scrollViewProps, subtitle, title }: ScreenProps) {
+  const { contentContainerStyle, ...restScrollViewProps } = scrollViewProps ?? {};
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar backgroundColor={colors.background} barStyle="light-content" />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.safeArea}>
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={[styles.content, contentContainerStyle]}
+          keyboardShouldPersistTaps="handled"
+          {...restScrollViewProps}
+        >
           <View style={styles.header}>
             <Text style={styles.title}>{title}</Text>
             {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}

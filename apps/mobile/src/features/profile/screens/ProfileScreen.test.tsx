@@ -75,10 +75,13 @@ describe("ProfileScreen", () => {
       </QueryClientProvider>,
     );
 
-    await waitFor(() => expect(mockGetMe).toHaveBeenCalled());
-    expect(await screen.findByText("Pilot Roman")).toBeTruthy();
-    expect(await screen.findByText("+375290001122")).toBeTruthy();
-    expect(await screen.findByText("MTB_APTEKI_20260422_ABCD")).toBeTruthy();
+    await waitFor(() => {
+      expect(mockGetMe).toHaveBeenCalled();
+      expect(mockGetPromocodes).toHaveBeenCalled();
+      expect(screen.getByText("Pilot Roman")).toBeTruthy();
+      expect(screen.getByText("+375290001122")).toBeTruthy();
+      expect(screen.getByText("MTB_APTEKI_20260422_ABCD")).toBeTruthy();
+    });
 
     fireEvent.press(screen.getByText("Скопировать"));
 

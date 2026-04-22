@@ -33,8 +33,24 @@ export function ProfileScreen() {
     queryFn: getPromocodes,
   });
 
-  if (meQuery.isLoading || promocodesQuery.isLoading || !meQuery.data || !promocodesQuery.data) {
+  if (meQuery.isLoading || promocodesQuery.isLoading) {
     return <LoadingView label="Собираем профиль..." />;
+  }
+
+  if (meQuery.isError || promocodesQuery.isError || !meQuery.data || !promocodesQuery.data) {
+    return (
+      <Screen title="Профиль" subtitle="Не удалось загрузить профиль.">
+        <SectionCard title="Ошибка загрузки">
+          <Text style={styles.emptyText}>
+            {meQuery.error instanceof Error
+              ? meQuery.error.message
+              : promocodesQuery.error instanceof Error
+                ? promocodesQuery.error.message
+                : "Повторите попытку позже."}
+          </Text>
+        </SectionCard>
+      </Screen>
+    );
   }
 
   const me = meQuery.data;

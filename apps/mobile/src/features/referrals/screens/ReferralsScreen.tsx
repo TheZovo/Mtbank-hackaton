@@ -47,8 +47,20 @@ export function ReferralsScreen() {
     });
   }
 
-  if (referralsQuery.isLoading || !referralsQuery.data) {
+  if (referralsQuery.isLoading) {
     return <LoadingView label="Загружаем реферальную программу..." />;
+  }
+
+  if (referralsQuery.isError || !referralsQuery.data) {
+    return (
+      <Screen title="Рефералы" subtitle="Не удалось загрузить реферальную программу.">
+        <SectionCard title="Ошибка загрузки">
+          <Text style={styles.emptyText}>
+            {referralsQuery.error instanceof Error ? referralsQuery.error.message : "Повторите попытку позже."}
+          </Text>
+        </SectionCard>
+      </Screen>
+    );
   }
 
   return (
