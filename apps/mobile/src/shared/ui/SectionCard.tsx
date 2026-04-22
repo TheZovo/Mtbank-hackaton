@@ -21,15 +21,15 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
     borderColor: colors.border,
-    borderRadius: 18,
+    borderRadius: 28,
     borderWidth: 1,
     gap: 8,
-    padding: 16,
+    padding: 18,
   },
   title: {
     color: colors.text,
     fontSize: 18,
-    fontWeight: "700",
+    fontWeight: "800",
   },
   description: {
     color: colors.textMuted,

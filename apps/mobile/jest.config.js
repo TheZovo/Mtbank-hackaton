@@ -1,5 +1,5 @@
 module.exports = {
-  preset: "react-native",
+  preset: "@react-native/jest-preset",
   roots: ["<rootDir>/src"],
   testMatch: ["**/*.test.ts", "**/*.test.tsx"],
   transformIgnorePatterns: [

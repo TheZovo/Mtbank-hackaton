@@ -19,7 +19,8 @@ export function QuestsScreen() {
     onSuccess: () => {
       void Promise.all([
         queryClient.invalidateQueries({ queryKey: ["quests"] }),
-        queryClient.invalidateQueries({ queryKey: ["profile"] }),
+        queryClient.invalidateQueries({ queryKey: ["me"] }),
+        queryClient.invalidateQueries({ queryKey: ["promocodes"] }),
         queryClient.invalidateQueries({ queryKey: ["rewards"] }),
         queryClient.invalidateQueries({ queryKey: ["leaderboard"] }),
       ]);
@@ -40,13 +41,14 @@ export function QuestsScreen() {
         const isClaimed = quest.status === "claimed";
         const progressRatio = Math.min(quest.current_value / quest.threshold, 1);
         const planetMeta = PLANET_META[quest.planet_code];
+        const rewardStars = Math.min(quest.stars_reward ?? 0, 3);
 
         return (
           <SectionCard key={quest.quest_id} title={quest.title} description={quest.description}>
             <View style={styles.metaRow}>
               <Text style={styles.pill}>{planetMeta.title}</Text>
-              <Text style={styles.pill}>{quest.category}</Text>
-              <Text style={styles.starReward}>{buildStarString(Math.min(quest.stars_reward, 3), 3)}</Text>
+              <Text style={styles.pill}>{quest.category ?? "Quest"}</Text>
+              <Text style={styles.starReward}>{buildStarString(rewardStars, 3)}</Text>
             </View>
             <View style={styles.progressTrack}>
               <View
@@ -62,7 +64,7 @@ export function QuestsScreen() {
             <Text style={styles.supportText}>
               Progress {Math.floor(quest.current_value)}/{quest.threshold}
             </Text>
-            <Text style={styles.rewardText}>Reward: {quest.reward_display}</Text>
+            <Text style={styles.rewardText}>Reward: {quest.reward_display ?? "Награда будет доступна позже"}</Text>
             <PrimaryButton
               disabled={!isReady || isClaimed || claimMutation.isPending}
               onPress={() => claimMutation.mutate(quest.quest_id)}

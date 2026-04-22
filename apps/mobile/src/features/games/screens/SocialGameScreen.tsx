@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { SIGNAL_PADS, SOCIAL_ROUNDS, randomSignal } from "@mtb/game-core";
 import type { SignalPadId } from "@mtb/game-core";
 import { submitGameRun } from "../../../shared/api/client";
-import { Screen } from "../../../shared/ui/Screen";
+import { colors } from "../../../shared/theme/colors";
 import { PrimaryButton } from "../../../shared/ui/PrimaryButton";
+import { Screen } from "../../../shared/ui/Screen";
 import { SecondaryButton } from "../../../shared/ui/SecondaryButton";
 import { SectionCard } from "../../../shared/ui/SectionCard";
 
@@ -26,9 +27,10 @@ export function SocialGameScreen() {
     onSuccess: () => {
       setHasSubmitted(true);
       void Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["profile"] }),
-        queryClient.invalidateQueries({ queryKey: ["rewards"] }),
-        queryClient.invalidateQueries({ queryKey: ["quests"] }),
+        queryClient.invalidateQueries({ queryKey: ["me"] }),
+        queryClient.invalidateQueries({ queryKey: ["promocodes"] }),
+        queryClient.invalidateQueries({ queryKey: ["planets-list"] }),
+        queryClient.invalidateQueries({ queryKey: ["planet-leaderboard"] }),
         queryClient.invalidateQueries({ queryKey: ["game-summary"] }),
       ]);
     },
@@ -113,10 +115,10 @@ export function SocialGameScreen() {
   return (
     <Screen
       title="Сигнальный ринг"
-      subtitle="Память и ритм без браузерного UI. Сервер принимает только итоговый score и сам начисляет награду."
+      subtitle="Мини-игра на память и ритм. Сервер принимает только итоговый счёт и сам считает прогресс."
       footer={
-        <View style={{ gap: 12 }}>
-          <PrimaryButton onPress={start} disabled={phase === "showing" || phase === "input"}>
+        <View style={styles.footer}>
+          <PrimaryButton disabled={phase === "showing" || phase === "input"} onPress={start}>
             {phase === "idle" ? "Старт" : "Запустить заново"}
           </PrimaryButton>
           <SecondaryButton onPress={reset}>Сбросить</SecondaryButton>
@@ -130,16 +132,16 @@ export function SocialGameScreen() {
       }
     >
       <SectionCard title="Прогресс">
-        <Text style={{ color: "#9DB6C9" }}>Раунд {round}/{SOCIAL_ROUNDS}</Text>
-        <Text style={{ color: "#9DB6C9" }}>Счет {score}</Text>
-        <Text style={{ color: "#9DB6C9" }}>Фаза {phase}</Text>
+        <Text style={styles.metaText}>Раунд {round}/{SOCIAL_ROUNDS}</Text>
+        <Text style={styles.metaText}>Счёт {score}</Text>
+        <Text style={styles.metaText}>Фаза {phase}</Text>
       </SectionCard>
       <SectionCard title="Панели">
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
+        <View style={styles.grid}>
           {SIGNAL_PADS.map((pad) => (
-            <View key={pad.id} style={{ flexBasis: "47%" }}>
+            <View key={pad.id} style={styles.pad}>
               <PrimaryButton onPress={() => handlePadPress(pad.id)}>
-                {activePad === pad.id ? `${pad.label} ●` : pad.label}
+                {activePad === pad.id ? `${pad.label} •` : pad.label}
               </PrimaryButton>
             </View>
           ))}
@@ -148,3 +150,20 @@ export function SocialGameScreen() {
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  footer: {
+    gap: 12,
+  },
+  metaText: {
+    color: colors.textMuted,
+  },
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  pad: {
+    flexBasis: "47%",
+  },
+});

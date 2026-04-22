@@ -1,5 +1,5 @@
-import { MMKV } from "react-native-mmkv";
+import { createMMKV } from "react-native-mmkv";
 
-export const preferencesStorage = new MMKV({
+export const preferencesStorage = createMMKV({
   id: "mtb-galaxy-preferences",
 });

@@ -23,7 +23,12 @@ function readPersistedMe(): MeResponse | null {
   if (!raw) {
     return null;
   }
-  return JSON.parse(raw) as MeResponse;
+  try {
+    return JSON.parse(raw) as MeResponse;
+  } catch {
+    preferencesStorage.remove(ME_KEY);
+    return null;
+  }
 }
 
 export const useSessionStore = create<SessionState>((set) => ({
@@ -60,7 +65,7 @@ export const useSessionStore = create<SessionState>((set) => ({
   },
   clear: async () => {
     await clearStoredSession();
-    preferencesStorage.delete(ME_KEY);
+    preferencesStorage.remove(ME_KEY);
     set({ status: "anonymous", accessToken: null, refreshToken: null, me: null });
   },
 }));

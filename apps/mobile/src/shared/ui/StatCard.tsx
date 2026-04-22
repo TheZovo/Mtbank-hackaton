@@ -18,11 +18,13 @@ export function StatCard({ label, value }: StatCardProps) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surfaceElevated,
-    borderRadius: 16,
+    borderColor: colors.border,
+    borderRadius: 24,
+    borderWidth: 1,
     flex: 1,
     gap: 6,
     minWidth: 140,
-    padding: 14,
+    padding: 16,
   },
   label: {
     color: colors.textMuted,
@@ -31,6 +33,6 @@ const styles = StyleSheet.create({
   value: {
     color: colors.text,
     fontSize: 22,
-    fontWeight: "700",
+    fontWeight: "800",
   },
 });

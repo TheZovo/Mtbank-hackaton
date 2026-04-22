@@ -27,20 +27,22 @@ export function PrimaryButton({ children, disabled, onPress }: PrimaryButtonProp
 const styles = StyleSheet.create({
   button: {
     backgroundColor: colors.primary,
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    borderRadius: 40,
+    justifyContent: "center",
+    minHeight: 56,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
   },
   disabled: {
     opacity: 0.55,
   },
   pressed: {
-    opacity: 0.88,
+    backgroundColor: colors.primaryPressed,
   },
   label: {
-    color: colors.text,
-    fontSize: 15,
-    fontWeight: "700",
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: "800",
     textAlign: "center",
   },
 });

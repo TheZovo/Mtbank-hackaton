@@ -1,52 +1,82 @@
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { buildStarString } from "@mtb/shared";
-import { StyleSheet, Text, View } from "react-native";
-import { getLeaderboard } from "../../../shared/api/client";
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { getPlanetLeaderboard, getPlanetsList } from "../../../shared/api/client";
 import { colors } from "../../../shared/theme/colors";
 import { LoadingView } from "../../../shared/ui/LoadingView";
 import { Screen } from "../../../shared/ui/Screen";
 import { SectionCard } from "../../../shared/ui/SectionCard";
-
-function medal(index: number): string {
-  if (index === 0) return "1";
-  if (index === 1) return "2";
-  if (index === 2) return "3";
-  return `${index + 1}`;
-}
+import { StarIcon } from "../../../shared/ui/StarIcon";
+import { StatCard } from "../../../shared/ui/StatCard";
 
 export function LeaderboardScreen() {
-  const leaderboardQuery = useQuery({
-    queryKey: ["leaderboard"],
-    queryFn: getLeaderboard,
+  const [selectedPlanetId, setSelectedPlanetId] = useState<string | null>(null);
+  const planetsQuery = useQuery({
+    queryKey: ["planets-list"],
+    queryFn: getPlanetsList,
   });
 
-  if (leaderboardQuery.isLoading || !leaderboardQuery.data) {
-    return <LoadingView />;
+  useEffect(() => {
+    if (!selectedPlanetId && planetsQuery.data?.planets[0]?.id) {
+      setSelectedPlanetId(planetsQuery.data.planets[0].id);
+    }
+  }, [planetsQuery.data, selectedPlanetId]);
+
+  const leaderboardQuery = useQuery({
+    enabled: Boolean(selectedPlanetId),
+    queryFn: () => getPlanetLeaderboard(selectedPlanetId ?? ""),
+    queryKey: ["planet-leaderboard", selectedPlanetId],
+  });
+
+  if (planetsQuery.isLoading || !planetsQuery.data || !selectedPlanetId || leaderboardQuery.isLoading || !leaderboardQuery.data) {
+    return <LoadingView label="Собираем рейтинг..." />;
   }
 
   return (
     <Screen
-      title="User rating"
-      subtitle="The leaderboard is now built around MTBank user rating, constellation stars and real profile progression instead of raw XP alone."
+      title="Рейтинг планет"
+      subtitle="Таб рейтинга уже встроен в FE1-навигацию. Пользователь может переключать планеты и смотреть недельную таблицу лидеров мок-сервера."
     >
-      <SectionCard title="Top users">
-        {leaderboardQuery.data.map((entry, index) => (
-          <View key={entry.user_id} style={styles.card}>
-            <View style={styles.header}>
-              <View style={styles.rankCircle}>
-                <Text style={styles.rankText}>{medal(index)}</Text>
-              </View>
-              <View style={styles.headerText}>
-                <Text style={styles.name}>{entry.display_name}</Text>
-                <Text style={styles.meta}>
-                  {entry.bank_rank} • Rating {entry.rating_score}
-                </Text>
+      <SectionCard title="Ваш результат">
+        <View style={styles.statsRow}>
+          <StatCard label="Мой ранг" value={`#${leaderboardQuery.data.my_rank}`} />
+          <StatCard label="Звёзды за период" value={leaderboardQuery.data.my_stars} />
+        </View>
+      </SectionCard>
+
+      <SectionCard title="Планеты">
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View style={styles.chipsRow}>
+            {planetsQuery.data.planets.map((planet) => {
+              const active = planet.id === selectedPlanetId;
+              return (
+                <Pressable
+                  key={planet.id}
+                  onPress={() => setSelectedPlanetId(planet.id)}
+                  style={[styles.chip, active ? styles.chipActive : null]}
+                >
+                  <Text style={[styles.chipText, active ? styles.chipTextActive : null]}>{planet.name}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </ScrollView>
+      </SectionCard>
+
+      <SectionCard title="Лидеры недели">
+        {leaderboardQuery.data.leaders.map((entry) => (
+          <View key={entry.user_id} style={styles.row}>
+            <View style={styles.rankBadge}>
+              <Text style={styles.rankText}>{entry.rank}</Text>
+            </View>
+            {entry.avatar_url ? <Image source={{ uri: entry.avatar_url }} style={styles.avatar} /> : null}
+            <View style={styles.entryContent}>
+              <Text style={styles.name}>{entry.name}</Text>
+              <View style={styles.starsRow}>
+                <StarIcon color={colors.warning} size={16} />
+                <Text style={styles.stars}>{entry.stars}</Text>
               </View>
             </View>
-            <Text style={styles.stars}>{buildStarString(Math.min(entry.total_stars, 15), 15)}</Text>
-            <Text style={styles.meta}>
-              Orbit level {entry.orbit_level} • XP {entry.total_xp} • Cashback {entry.cashback_balance.toFixed(1)} BYN
-            </Text>
           </View>
         ))}
       </SectionCard>
@@ -55,46 +85,77 @@ export function LeaderboardScreen() {
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surfaceElevated,
-    borderRadius: 16,
-    gap: 8,
-    padding: 14,
-  },
-  header: {
-    alignItems: "center",
+  statsRow: {
     flexDirection: "row",
     gap: 12,
   },
-  rankCircle: {
-    alignItems: "center",
-    backgroundColor: colors.primary,
+  chipsRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  chip: {
+    backgroundColor: colors.surfaceElevated,
+    borderColor: colors.border,
     borderRadius: 999,
-    height: 36,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  chipActive: {
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.primary,
+  },
+  chipText: {
+    color: colors.textMuted,
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  chipTextActive: {
+    color: colors.primary,
+  },
+  row: {
+    alignItems: "center",
+    backgroundColor: colors.surfaceElevated,
+    borderRadius: 20,
+    flexDirection: "row",
+    gap: 12,
+    padding: 12,
+  },
+  rankBadge: {
+    alignItems: "center",
+    backgroundColor: colors.primarySoft,
+    borderRadius: 999,
+    height: 34,
     justifyContent: "center",
-    width: 36,
+    width: 34,
   },
   rankText: {
-    color: colors.text,
-    fontSize: 16,
+    color: colors.primary,
+    fontSize: 14,
     fontWeight: "800",
   },
-  headerText: {
+  avatar: {
+    borderRadius: 18,
+    height: 36,
+    width: 36,
+  },
+  entryContent: {
     flex: 1,
-    gap: 2,
+    gap: 4,
   },
   name: {
     color: colors.text,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "700",
   },
-  meta: {
-    color: colors.textMuted,
-    fontSize: 13,
+  starsRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 6,
   },
   stars: {
-    color: colors.warning,
-    fontSize: 15,
-    letterSpacing: 0.5,
+    color: colors.textMuted,
+    fontSize: 13,
+    fontWeight: "700",
   },
 });

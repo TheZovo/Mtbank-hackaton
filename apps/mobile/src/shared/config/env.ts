@@ -1,4 +1,7 @@
 import { Platform } from "react-native";
 
-export const API_BASE_URL =
-  Platform.OS === "android" ? "http://10.0.2.2:8000/v1" : "http://localhost:8000/v1";
+const runtimeProcess = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process;
+const envApiBaseUrl = runtimeProcess?.env?.API_BASE_URL;
+const defaultHost = Platform.OS === "android" ? "10.0.2.2" : "localhost";
+
+export const API_BASE_URL = envApiBaseUrl ?? `http://${defaultHost}:8001/v1`;

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   SHIELD_PULSE_BASE_SPEED,
@@ -10,8 +10,9 @@ import {
   getShieldScoreIncrement,
 } from "@mtb/game-core";
 import { submitGameRun } from "../../../shared/api/client";
-import { Screen } from "../../../shared/ui/Screen";
+import { colors } from "../../../shared/theme/colors";
 import { PrimaryButton } from "../../../shared/ui/PrimaryButton";
+import { Screen } from "../../../shared/ui/Screen";
 import { SecondaryButton } from "../../../shared/ui/SecondaryButton";
 import { SectionCard } from "../../../shared/ui/SectionCard";
 
@@ -29,12 +30,13 @@ export function ShieldGameScreen() {
 
   const submitMutation = useMutation({
     mutationFn: () => submitGameRun("credit_shield_reactor", { score }),
-    onSuccess: (payload) => {
+    onSuccess: () => {
       setHasSubmitted(true);
       void Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["profile"] }),
-        queryClient.invalidateQueries({ queryKey: ["rewards"] }),
-        queryClient.invalidateQueries({ queryKey: ["quests"] }),
+        queryClient.invalidateQueries({ queryKey: ["me"] }),
+        queryClient.invalidateQueries({ queryKey: ["promocodes"] }),
+        queryClient.invalidateQueries({ queryKey: ["planets-list"] }),
+        queryClient.invalidateQueries({ queryKey: ["planet-leaderboard"] }),
         queryClient.invalidateQueries({ queryKey: ["game-summary"] }),
       ]);
     },
@@ -87,13 +89,13 @@ export function ShieldGameScreen() {
   return (
     <Screen
       title="Реактор щита"
-      subtitle="Тайминг-игра без web-специфики: результат отправляется в `/v1/games/credit_shield_reactor/runs`."
+      subtitle="Игра на тайминг и точность. Итоговый результат отправляется в `/v1/games/credit_shield_reactor/runs`."
       footer={
-        <View style={{ gap: 12 }}>
-          <PrimaryButton onPress={() => setIsRunning(true)} disabled={isRunning || isComplete}>
+        <View style={styles.footer}>
+          <PrimaryButton disabled={isRunning || isComplete} onPress={() => setIsRunning(true)}>
             Старт реактора
           </PrimaryButton>
-          <SecondaryButton onPress={lockPulse} disabled={!isRunning || isComplete}>
+          <SecondaryButton disabled={!isRunning || isComplete} onPress={lockPulse}>
             Зафиксировать импульс
           </SecondaryButton>
           <SecondaryButton onPress={reset}>Сбросить</SecondaryButton>
@@ -107,23 +109,45 @@ export function ShieldGameScreen() {
       }
     >
       <SectionCard title="Состояние">
-        <Text style={{ color: "#9DB6C9" }}>Раунд {round}/{SHIELD_ROUNDS}</Text>
-        <Text style={{ color: "#9DB6C9" }}>Счет {score}</Text>
-        <Text style={{ color: "#9DB6C9" }}>Точность {accuracyBand}</Text>
+        <Text style={styles.metaText}>Раунд {round}/{SHIELD_ROUNDS}</Text>
+        <Text style={styles.metaText}>Счёт {score}</Text>
+        <Text style={styles.metaText}>Точность {accuracyBand}</Text>
       </SectionCard>
       <SectionCard title="Шкала импульса">
-        <View style={{ backgroundColor: "#11263A", borderRadius: 16, height: 18, overflow: "hidden" }}>
+        <View style={styles.track}>
           <View
-            style={{
-              backgroundColor: accuracyBand === "perfect" ? "#14B8A6" : accuracyBand === "good" ? "#F59E0B" : "#FF7A59",
-              height: 18,
-              marginLeft: `${position}%`,
-              width: 18,
-            }}
+            style={[
+              styles.marker,
+              {
+                backgroundColor:
+                  accuracyBand === "perfect" ? colors.success : accuracyBand === "good" ? colors.warning : colors.primary,
+                marginLeft: `${position}%`,
+              },
+            ]}
           />
         </View>
-        <Text style={{ color: "#9DB6C9" }}>Позиция {Math.round(position)}%</Text>
+        <Text style={styles.metaText}>Позиция {Math.round(position)}%</Text>
       </SectionCard>
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  footer: {
+    gap: 12,
+  },
+  metaText: {
+    color: colors.textMuted,
+  },
+  track: {
+    backgroundColor: colors.surfaceElevated,
+    borderRadius: 16,
+    height: 18,
+    overflow: "hidden",
+  },
+  marker: {
+    borderRadius: 9,
+    height: 18,
+    width: 18,
+  },
+});
