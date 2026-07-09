@@ -4,23 +4,6 @@
  */
 
 export interface paths {
-    "/healthz": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Healthcheck */
-        get: operations["healthcheck_healthz_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/auth/request-otp": {
         parameters: {
             query?: never;
@@ -64,8 +47,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Refresh Token */
-        post: operations["refresh_token_v1_auth_refresh_post"];
+        /** Refresh Tokens */
+        post: operations["refresh_tokens_v1_auth_refresh_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -89,6 +72,194 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get User By Nickname */
+        get: operations["get_user_by_nickname_v1_users_get"];
+        put?: never;
+        /** Create User */
+        post: operations["create_user_v1_users_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Me */
+        get: operations["get_me_v1_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/friends": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Friendship */
+        post: operations["create_friendship_v1_friends_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/friends/{user_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Friends */
+        get: operations["get_friends_v1_friends__user_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/play-together": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Play Together */
+        post: operations["create_play_together_v1_play_together_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/payment-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Payment Request Endpoint */
+        post: operations["create_payment_request_endpoint_v1_payment_requests_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/payment-requests/{request_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Payment Request Endpoint */
+        get: operations["get_payment_request_endpoint_v1_payment_requests__request_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/payment-requests/{request_id}/pay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Pay Payment Request Endpoint */
+        post: operations["pay_payment_request_endpoint_v1_payment_requests__request_id__pay_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Profile */
+        get: operations["get_profile_v1_profile_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/profile/focus-planet": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Set Focus Planet */
+        patch: operations["set_focus_planet_v1_profile_focus_planet_patch"];
+        trace?: never;
+    };
+    "/v1/promocodes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Promocodes */
+        get: operations["get_promocodes_v1_promocodes_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/planets/list": {
         parameters: {
             query?: never;
@@ -96,8 +267,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List Planets */
-        get: operations["list_planets_v1_planets_list_get"];
+        /** Get Planets */
+        get: operations["get_planets_v1_planets_list_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -136,11 +307,28 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Set Focus Planet */
-        patch: operations["set_focus_planet_v1_planets__planet_id__focus_patch"];
+        /** Focus Planet */
+        patch: operations["focus_planet_v1_planets__planet_id__focus_patch"];
         trace?: never;
     };
-    "/v1/games/{game_code}/runs": {
+    "/v1/quests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Quests */
+        get: operations["get_quests_v1_quests_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/quests/{quest_id}/claim": {
         parameters: {
             query?: never;
             header?: never;
@@ -149,57 +337,23 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Submit Game Run */
-        post: operations["submit_game_run_v1_games__game_code__runs_post"];
+        /** Claim Quest */
+        post: operations["claim_quest_v1_quests__quest_id__claim_post"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/v1/leaderboard/planet/{planet_id}": {
+    "/v1/rewards/ledger": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get Leaderboard */
-        get: operations["get_leaderboard_v1_leaderboard_planet__planet_id__get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/me": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Me */
-        get: operations["get_me_v1_me_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/promocodes": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Promocodes */
-        get: operations["get_promocodes_v1_promocodes_get"];
+        /** Get Reward Ledger */
+        get: operations["get_reward_ledger_v1_rewards_ledger_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -218,15 +372,15 @@ export interface paths {
         /** Get Referrals */
         get: operations["get_referrals_v1_referrals_get"];
         put?: never;
-        /** Create Referral */
-        post: operations["create_referral_v1_referrals_post"];
+        /** Create Referral Invite */
+        post: operations["create_referral_invite_v1_referrals_post"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/v1/admin/reset": {
+    "/v1/games/{game_code}/runs": {
         parameters: {
             query?: never;
             header?: never;
@@ -235,8 +389,76 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Admin Reset */
-        post: operations["admin_reset_v1_admin_reset_post"];
+        /** Create Game Run */
+        post: operations["create_game_run_v1_games__game_code__runs_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/games/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Game Summary */
+        get: operations["game_summary_v1_games_summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/leaderboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Leaderboard */
+        get: operations["leaderboard_v1_leaderboard_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/leaderboard/planet/{planet_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Planet Leaderboard */
+        get: operations["planet_leaderboard_v1_leaderboard_planet__planet_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/transactions/webhook": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Transaction Webhook */
+        post: operations["transaction_webhook_v1_transactions_webhook_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -252,8 +474,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Admin End Period */
-        post: operations["admin_end_period_v1_admin_end_period_post"];
+        /** End Period Endpoint */
+        post: operations["end_period_endpoint_v1_admin_end_period_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -264,104 +486,263 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** AdminEndPeriodResponse */
-        AdminEndPeriodResponse: {
-            /** Status */
-            status: string;
-            /** Promocodes Generated */
-            promocodes_generated: number;
-        };
-        /** AdminResetResponse */
-        AdminResetResponse: {
-            /** Status */
-            status: string;
-        };
-        /** AuthUser */
-        AuthUser: {
-            /** Id */
-            id: string;
-            /** Phone */
-            phone: string;
-            /** Name */
-            name: string;
-        };
-        /** ConstellationProgress */
-        ConstellationProgress: {
-            /** Name */
-            name: string;
-            /** Index */
-            index: number;
-            /** Big Stars Total */
-            big_stars_total: number;
-            /** Current Big Star */
-            current_big_star: number;
-            /** Small Stars Per Segment */
-            small_stars_per_segment: number;
-            /** Small Stars Current */
-            small_stars_current: number;
-            /** Big Stars */
-            big_stars: boolean[];
-            /** Segment Small Stars */
-            segment_small_stars: number[];
-        };
-        /** ErrorResponse */
-        ErrorResponse: {
+        /** ActivityOut */
+        ActivityOut: {
+            /** Activity Id */
+            activity_id: string;
+            /** Title */
+            title: string;
             /** Detail */
             detail: string;
-        };
-        /** FocusBody */
-        FocusBody: {
+            /** Reward */
+            reward: number;
+            planet_code: components["schemas"]["PlanetCode"] | null;
             /**
-             * Focus
-             * @default true
+             * Created At
+             * Format: date-time
              */
-            focus: boolean;
+            created_at: string;
         };
-        /** GameRunBody */
-        GameRunBody: {
-            /** Score */
-            score: number;
+        /** AuthLoginResponse */
+        AuthLoginResponse: {
+            /** Access Token */
+            access_token: string;
+            /** Refresh Token */
+            refresh_token: string;
+            /**
+             * Token Type
+             * @default bearer
+             */
+            token_type: string;
+            /** Expires In Seconds */
+            expires_in_seconds: number;
+            user: components["schemas"]["UserSummaryOut"];
+            me: components["schemas"]["MeResponse"];
+        };
+        /** AuthTokensResponse */
+        AuthTokensResponse: {
+            /** Access Token */
+            access_token: string;
+            /** Refresh Token */
+            refresh_token: string;
+            /**
+             * Token Type
+             * @default bearer
+             */
+            token_type: string;
+            /** Expires In Seconds */
+            expires_in_seconds: number;
+        };
+        /** BoosterWindowOut */
+        BoosterWindowOut: {
+            /** Booster Id */
+            booster_id: string;
+            /** Category */
+            category: string;
+            /** Boost Rate */
+            boost_rate: number;
+            /**
+             * Start At
+             * Format: date-time
+             */
+            start_at: string;
+            /**
+             * End At
+             * Format: date-time
+             */
+            end_at: string;
+            /** Status */
+            status: string;
+        };
+        /**
+         * ConstellationCode
+         * @enum {string}
+         */
+        ConstellationCode: "CASHBACK_COMET" | "TRUST_ANCHOR" | "COMMUNITY_NOVA";
+        /** EndPeriodPlanetOut */
+        EndPeriodPlanetOut: {
             /** Planet Id */
             planet_id: string;
+            /** Winners */
+            winners: number;
+            /** Period Id */
+            period_id: string;
         };
-        /** GameRunResponse */
-        GameRunResponse: {
+        /** EndPeriodResponse */
+        EndPeriodResponse: {
+            /** Status */
+            status: string;
+            /** Period Type */
+            period_type: string;
+            /** Planets */
+            planets: components["schemas"]["EndPeriodPlanetOut"][];
+        };
+        /** FocusPlanetResponse */
+        FocusPlanetResponse: {
+            /** Planet Id */
+            planet_id: string;
+            /** Focus */
+            focus: boolean;
+        };
+        /** FriendAddRequest */
+        FriendAddRequest: {
+            /** User Id */
+            user_id: string;
+            /** Friend Id */
+            friend_id: string;
+        };
+        /** FriendEntryOut */
+        FriendEntryOut: {
+            /** Id */
+            id: string;
+            /** Nickname */
+            nickname: string;
+            /** Games Played */
+            games_played: number;
+        };
+        /** GalaxyProfileResponse */
+        GalaxyProfileResponse: {
+            user: components["schemas"]["UserSummaryOut"];
+            /** Orbit Level */
+            orbit_level: number;
+            /** Total Energy */
+            total_energy: number;
+            /** Total Xp */
+            total_xp: number;
+            /** Stardust */
+            stardust: number;
+            /** Bonus Streak */
+            bonus_streak: number;
+            /** Vault Charge */
+            vault_charge: number;
+            /** Vault Crates */
+            vault_crates: number;
+            selected_planet: components["schemas"]["PlanetCode"];
+            rating: components["schemas"]["RatingOverviewOut"];
+            wallet: components["schemas"]["WalletOut"];
+            quest_summary: components["schemas"]["QuestSummaryOut"];
+            /** Constellations */
+            constellations: components["schemas"]["modules__profile__schemas__ConstellationOut"][];
+            /** Planets */
+            planets: components["schemas"]["modules__profile__schemas__PlanetProgressOut"][];
+            /** Active Boosters */
+            active_boosters: components["schemas"]["BoosterWindowOut"][];
+            /** Quests */
+            quests: components["schemas"]["QuestOut"][];
+            /** Reward Ledger Preview */
+            reward_ledger_preview: components["schemas"]["RewardOut"][];
+            /** Activity */
+            activity: components["schemas"]["ActivityOut"][];
+            installment_profile: components["schemas"]["InstallmentProfileOut"];
+        };
+        /**
+         * GameCode
+         * @enum {string}
+         */
+        GameCode: "halva_snake" | "credit_shield_reactor" | "social_ring_signal";
+        /** GameRunOut */
+        GameRunOut: {
+            /** Run Id */
+            run_id: string;
+            game_code: components["schemas"]["GameCode"];
+            planet_code: components["schemas"]["PlanetCode"];
+            /** Score */
+            score: number;
+            /** Base Reward */
+            base_reward: number;
+            /** Total Reward */
+            total_reward: number;
+            /** Bonus Breakdown */
+            bonus_breakdown: {
+                [key: string]: unknown;
+            };
             /** Small Star Awarded */
             small_star_awarded: boolean;
             /** Remaining Attempts Today */
             remaining_attempts_today: number;
-            planet_progress: components["schemas"]["PlanetProgressResponse"];
+            planet_progress: components["schemas"]["modules__planets__schemas__PlanetProgressOut"];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** GameRunSubmitRequest */
+        GameRunSubmitRequest: {
+            /** Score */
+            score: number;
+            /** Planet Id */
+            planet_id?: string | null;
+        };
+        /** GameSummaryItemOut */
+        GameSummaryItemOut: {
+            game_code: components["schemas"]["GameCode"];
+            planet_code: components["schemas"]["PlanetCode"];
+            /** Runs */
+            runs: number;
+            /** Best Score */
+            best_score: number;
+            /** Total Reward */
+            total_reward: number;
+            /** Total Cashback */
+            total_cashback: number;
+            /** Total Bonus Points */
+            total_bonus_points: number;
+        };
+        /** GameSummaryOut */
+        GameSummaryOut: {
+            /** Total Runs */
+            total_runs: number;
+            /** Total Reward */
+            total_reward: number;
+            /** Total Cashback */
+            total_cashback: number;
+            /** Total Bonus Points */
+            total_bonus_points: number;
+            /** Games */
+            games: components["schemas"]["GameSummaryItemOut"][];
         };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
-        /** LeaderboardEntry */
-        LeaderboardEntry: {
-            /** Rank */
-            rank: number;
+        /** InstallmentProfileOut */
+        InstallmentProfileOut: {
+            /** Current Limit */
+            current_limit: number;
+            /** Available Limit */
+            available_limit: number;
+            /** Risk Score */
+            risk_score: number;
+            /** On Time Payments 3M */
+            on_time_payments_3m: number;
+            /** Late Flags */
+            late_flags: number;
+        };
+        /** LeaderboardEntryOut */
+        LeaderboardEntryOut: {
             /** User Id */
             user_id: string;
-            /** Name */
-            name: string;
-            /** Avatar Url */
-            avatar_url: string;
-            /** Stars */
-            stars: number;
+            /** Display Name */
+            display_name: string;
+            /** Orbit Level */
+            orbit_level: number;
+            /** Total Xp */
+            total_xp: number;
+            /** Rating Score */
+            rating_score: number;
+            /** Bank Rank */
+            bank_rank: string;
+            /** Total Stars */
+            total_stars: number;
+            /** Cashback Balance */
+            cashback_balance: number;
         };
-        /** LeaderboardResponse */
-        LeaderboardResponse: {
-            /** Planet Id */
-            planet_id: string;
-            /** Period */
-            period: string;
-            /** My Rank */
-            my_rank: number;
-            /** My Stars */
-            my_stars: number;
-            /** Leaders */
-            leaders: components["schemas"]["LeaderboardEntry"][];
+        /** LogoutRequest */
+        LogoutRequest: {
+            /** Refresh Token */
+            refresh_token?: string | null;
         };
         /** MeResponse */
         MeResponse: {
@@ -371,43 +752,95 @@ export interface components {
             phone: string;
             /** Name */
             name: string;
+            /** Nickname */
+            nickname?: string | null;
             /** Daily Game Attempts Used */
             daily_game_attempts_used: number;
             /** Daily Game Attempts Limit */
             daily_game_attempts_limit: number;
-            /** Total Constellations Sum */
-            total_constellations_sum: number;
-            /** Average Cashback */
-            average_cashback: number;
+            user: components["schemas"]["UserSummaryOut"];
+            selected_planet: components["schemas"]["PlanetCode"];
         };
-        /** PlanetGameProgress */
-        PlanetGameProgress: {
+        /** PaymentRequestCreateRequest */
+        PaymentRequestCreateRequest: {
+            /** Amount */
+            amount: number;
+            /** Description */
+            description: string;
+            /** User Id */
+            user_id: string;
+        };
+        /** PaymentRequestCreateResponse */
+        PaymentRequestCreateResponse: {
+            /** Id */
+            id: string;
+        };
+        /** PaymentRequestOut */
+        PaymentRequestOut: {
+            /** Id */
+            id: string;
+            /** Amount */
+            amount: number;
+            /** Description */
+            description: string;
+            /** Status */
+            status: string;
+        };
+        /** PaymentRequestPayResponse */
+        PaymentRequestPayResponse: {
+            /** Success */
+            success: boolean;
+        };
+        /**
+         * PlanetCode
+         * @enum {string}
+         */
+        PlanetCode: "ORBIT_COMMERCE" | "CREDIT_SHIELD" | "SOCIAL_RING";
+        /** PlanetGameOut */
+        PlanetGameOut: {
             /** Code */
             code: string;
             /** Name */
             name: string;
-            /** Daily Attempts Used */
-            daily_attempts_used: number;
-            /** Daily Attempts Limit */
-            daily_attempts_limit: number;
+            /** Attempts Used */
+            attempts_used: number;
+            /** Attempts Limit */
+            attempts_limit: number;
         };
-        /** PlanetProgressResponse */
-        PlanetProgressResponse: {
+        /** PlanetLeaderboardItemOut */
+        PlanetLeaderboardItemOut: {
+            /** Rank */
+            rank: number;
+            /** User Id */
+            user_id: string;
+            /** Display Name */
+            display_name: string;
+            /** Small Stars */
+            small_stars: number;
+            /**
+             * Is Current User
+             * @default false
+             */
+            is_current_user: boolean;
+        };
+        /** PlanetLeaderboardOut */
+        PlanetLeaderboardOut: {
             /** Planet Id */
             planet_id: string;
-            /** Cashback Percent */
-            cashback_percent: number;
-            /** Max Cashback Reached */
-            max_cashback_reached: boolean;
-            constellation: components["schemas"]["ConstellationProgress"];
-            /** Period Small Stars */
-            period_small_stars: number;
-            /** Big Stars Until Increase */
-            big_stars_until_increase: number;
-            game: components["schemas"]["PlanetGameProgress"];
+            /** Period */
+            period: string;
+            /**
+             * Period Ends At
+             * Format: date-time
+             */
+            period_ends_at: string;
+            /** Top */
+            top: components["schemas"]["PlanetLeaderboardItemOut"][];
+            /** Current User Rank */
+            current_user_rank: number | null;
         };
-        /** PlanetSummary */
-        PlanetSummary: {
+        /** PlanetListItemOut */
+        PlanetListItemOut: {
             /** Id */
             id: string;
             /** Name */
@@ -417,17 +850,30 @@ export interface components {
             /** Progress Percent */
             progress_percent: number;
         };
-        /** PlanetsListResponse */
-        PlanetsListResponse: {
-            /** Planets */
-            planets: components["schemas"]["PlanetSummary"][];
+        /** PlayTogetherRequest */
+        PlayTogetherRequest: {
+            /** User Id */
+            user_id: string;
+            /** Friend Id */
+            friend_id: string;
         };
-        /** PromoCodeModel */
-        PromoCodeModel: {
-            /** Code */
-            code: string;
+        /** PlayTogetherResponse */
+        PlayTogetherResponse: {
+            /** Gift */
+            gift: boolean;
+            /** Promocode */
+            promocode?: string | null;
+        };
+        /** PromoCodeOut */
+        PromoCodeOut: {
+            /** Promocode Id */
+            promocode_id: string;
+            /** User Id */
+            user_id: string;
             /** Planet Id */
             planet_id: string;
+            /** Code */
+            code: string;
             /**
              * Issued At
              * Format: date-time
@@ -436,15 +882,62 @@ export interface components {
             /** Used At */
             used_at?: string | null;
         };
-        /** PromoCodesResponse */
-        PromoCodesResponse: {
-            /** Promocodes */
-            promocodes: components["schemas"]["PromoCodeModel"][];
+        /** QuestOut */
+        QuestOut: {
+            /** Quest Id */
+            quest_id: string;
+            /** Title */
+            title: string;
+            /** Description */
+            description: string;
+            planet_code: components["schemas"]["PlanetCode"];
+            /** Category */
+            category: string;
+            /** Condition Type */
+            condition_type: string;
+            /** Threshold */
+            threshold: number;
+            /** Reward Kind */
+            reward_kind: string;
+            /** Reward Value */
+            reward_value: number;
+            /** Reward Display */
+            reward_display: string;
+            /** Stars Reward */
+            stars_reward: number;
+            /** Status */
+            status: string;
+            /** Current Value */
+            current_value: number;
         };
-        /** ReferralCreateBody */
-        ReferralCreateBody: {
+        /** QuestSummaryOut */
+        QuestSummaryOut: {
+            /** Active */
+            active: number;
+            /** Completed */
+            completed: number;
+            /** Claimed */
+            claimed: number;
+        };
+        /** RatingOverviewOut */
+        RatingOverviewOut: {
+            /** Rating Score */
+            rating_score: number;
+            /** Bank Rank */
+            bank_rank: string;
+            /** Total Stars */
+            total_stars: number;
+            /** Orbit Level */
+            orbit_level: number;
+            /** Completed Quests */
+            completed_quests: number;
+        };
+        /** ReferralCreateRequest */
+        ReferralCreateRequest: {
             /** Phone */
-            phone: string;
+            phone?: string | null;
+            /** Invitee Phone */
+            invitee_phone?: string | null;
         };
         /** ReferralCreateResponse */
         ReferralCreateResponse: {
@@ -453,8 +946,8 @@ export interface components {
             /** Invite Code */
             invite_code: string;
         };
-        /** ReferralRecord */
-        ReferralRecord: {
+        /** ReferralInviteOut */
+        ReferralInviteOut: {
             /** Phone */
             phone: string;
             /** Status */
@@ -462,44 +955,125 @@ export interface components {
             /** Stars Earned */
             stars_earned: number;
         };
-        /** ReferralsResponse */
-        ReferralsResponse: {
+        /** ReferralListResponse */
+        ReferralListResponse: {
             /** Invite Code */
             invite_code: string;
             /** Referrals */
-            referrals: components["schemas"]["ReferralRecord"][];
+            referrals: components["schemas"]["ReferralInviteOut"][];
         };
-        /** RefreshBody */
-        RefreshBody: {
+        /** RefreshRequest */
+        RefreshRequest: {
             /** Refresh Token */
             refresh_token: string;
         };
-        /** RefreshResponse */
-        RefreshResponse: {
-            /** Access Token */
-            access_token: string;
-            /** Refresh Token */
-            refresh_token: string;
-        };
-        /** RequestOtpBody */
-        RequestOtpBody: {
-            /**
-             * Phone
-             * @example +79991234567
-             */
+        /** RequestOtpRequest */
+        RequestOtpRequest: {
+            /** Phone */
             phone: string;
         };
         /** RequestOtpResponse */
         RequestOtpResponse: {
-            /** Message */
+            /**
+             * Message
+             * @default OTP sent
+             */
             message: string;
+            /** Challenge Id */
+            challenge_id: string;
+            /** Expires In Seconds */
+            expires_in_seconds: number;
+            /** Dev Code */
+            dev_code?: string | null;
             /** Dev Otp */
-            dev_otp: string;
+            dev_otp?: string | null;
         };
-        /** StatusResponse */
-        StatusResponse: {
+        /** RewardOut */
+        RewardOut: {
+            /** Ledger Id */
+            ledger_id: string;
+            /** Reward Type */
+            reward_type: string;
+            /** Amount */
+            amount: number;
             /** Status */
             status: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Meta */
+            meta: {
+                [key: string]: unknown;
+            };
+            /** Title */
+            title: string;
+            /** Description */
+            description: string;
+        };
+        /**
+         * SegmentKey
+         * @enum {string}
+         */
+        SegmentKey: "student" | "first-jobber" | "freelancer";
+        /** SimpleSuccessResponse */
+        SimpleSuccessResponse: {
+            /** Success */
+            success: boolean;
+        };
+        /** TransactionWebhookRequest */
+        TransactionWebhookRequest: {
+            /** User Id */
+            user_id: string;
+            /** Amount Rub */
+            amount_rub: number;
+            /** Mcc Code */
+            mcc_code: string;
+        };
+        /** TransactionWebhookResponse */
+        TransactionWebhookResponse: {
+            /** Status */
+            status: string;
+            /** Small Stars Awarded */
+            small_stars_awarded: number;
+            /** Planet Id */
+            planet_id: string | null;
+        };
+        /** UserByNicknameRequest */
+        UserByNicknameRequest: {
+            /** Nickname */
+            nickname: string;
+            /** User Id */
+            user_id?: string | null;
+        };
+        /** UserByNicknameResponse */
+        UserByNicknameResponse: {
+            /** Id */
+            id: string;
+            /** Nickname */
+            nickname: string;
+        };
+        /** UserSummaryOut */
+        UserSummaryOut: {
+            /** User Id */
+            user_id: string;
+            /** Phone */
+            phone: string;
+            /** Display Name */
+            display_name: string;
+            /** Nickname */
+            nickname?: string | null;
+            segment: components["schemas"]["SegmentKey"];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            readonly id: string;
+            /** Name */
+            readonly name: string;
         };
         /** ValidationError */
         ValidationError: {
@@ -514,31 +1088,112 @@ export interface components {
             /** Context */
             ctx?: Record<string, never>;
         };
-        /** VerifyOtpBody */
-        VerifyOtpBody: {
-            /**
-             * Phone
-             * @example +79991234567
-             */
+        /** VerifyOtpRequest */
+        VerifyOtpRequest: {
+            /** Challenge Id */
+            challenge_id?: string | null;
+            /** Phone */
             phone: string;
-            /**
-             * Code
-             * @example 123456
-             */
-            code: string;
-            /**
-             * Name
-             * @example Тестовый
-             */
+            /** Otp Code */
+            otp_code?: string | null;
+            /** Code */
+            code?: string | null;
+            /** Display Name */
+            display_name?: string | null;
+            /** Name */
             name?: string | null;
+            segment?: components["schemas"]["SegmentKey"] | null;
         };
-        /** VerifyOtpResponse */
-        VerifyOtpResponse: {
-            /** Access Token */
-            access_token: string;
-            /** Refresh Token */
-            refresh_token: string;
-            user: components["schemas"]["AuthUser"];
+        /** WalletOut */
+        WalletOut: {
+            /** Cashback Balance */
+            cashback_balance: number;
+            /** Bonus Points */
+            bonus_points: number;
+            /** Rating Boost */
+            rating_boost: number;
+            /** Total Energy */
+            total_energy: number;
+            /** Vault Charge */
+            vault_charge: number;
+            /** Vault Crates */
+            vault_crates: number;
+        };
+        /** ConstellationOut */
+        modules__planets__schemas__ConstellationOut: {
+            /** Name */
+            name: string;
+            /** Index */
+            index: number;
+            /** Big Stars */
+            big_stars: number;
+            /** Current Big Star */
+            current_big_star: number;
+            /** Small Stars Current */
+            small_stars_current: number;
+            /** Small Stars Required */
+            small_stars_required: number;
+            /** Big Stars State */
+            big_stars_state: boolean[];
+            /** Small Stars State */
+            small_stars_state: boolean[];
+        };
+        /** FocusPlanetRequest */
+        modules__planets__schemas__FocusPlanetRequest: {
+            /** Focus */
+            focus: boolean;
+        };
+        /** PlanetProgressOut */
+        modules__planets__schemas__PlanetProgressOut: {
+            /** Planet Id */
+            planet_id: string;
+            /** Name */
+            name: string;
+            /** Cashback Percent */
+            cashback_percent: number;
+            /** Max Cashback Reached */
+            max_cashback_reached: boolean;
+            constellation: components["schemas"]["modules__planets__schemas__ConstellationOut"];
+            /** Period Small Stars */
+            period_small_stars: number;
+            /** Big Stars Until Increase */
+            big_stars_until_increase: number;
+            game: components["schemas"]["PlanetGameOut"];
+        };
+        /** ConstellationOut */
+        modules__profile__schemas__ConstellationOut: {
+            constellation_code: components["schemas"]["ConstellationCode"];
+            /** Title */
+            title: string;
+            /** Theme */
+            theme: string;
+            /** Headline */
+            headline: string;
+            /** Accent */
+            accent: string;
+            planet_code: components["schemas"]["PlanetCode"];
+            /** Stars Filled */
+            stars_filled: number;
+            /** Total Stars */
+            total_stars: number;
+            /** Completion Ratio */
+            completion_ratio: number;
+            /** Next Goal */
+            next_goal: string;
+        };
+        /** FocusPlanetRequest */
+        modules__profile__schemas__FocusPlanetRequest: {
+            planet_code: components["schemas"]["PlanetCode"];
+        };
+        /** PlanetProgressOut */
+        modules__profile__schemas__PlanetProgressOut: {
+            planet_code: components["schemas"]["PlanetCode"];
+            /** Xp */
+            xp: number;
+            /** Level */
+            level: number;
+            /** Mastery */
+            mastery: number;
         };
     };
     responses: never;
@@ -549,28 +1204,6 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    healthcheck_healthz_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: string;
-                    };
-                };
-            };
-        };
-    };
     request_otp_v1_auth_request_otp_post: {
         parameters: {
             query?: never;
@@ -580,7 +1213,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["RequestOtpBody"];
+                "application/json": components["schemas"]["RequestOtpRequest"];
             };
         };
         responses: {
@@ -613,7 +1246,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["VerifyOtpBody"];
+                "application/json": components["schemas"]["VerifyOtpRequest"];
             };
         };
         responses: {
@@ -623,16 +1256,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["VerifyOtpResponse"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["AuthLoginResponse"];
                 };
             };
             /** @description Validation Error */
@@ -646,7 +1270,7 @@ export interface operations {
             };
         };
     };
-    refresh_token_v1_auth_refresh_post: {
+    refresh_tokens_v1_auth_refresh_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -655,7 +1279,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["RefreshBody"];
+                "application/json": components["schemas"]["RefreshRequest"];
             };
         };
         responses: {
@@ -665,7 +1289,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["RefreshResponse"];
+                    "application/json": components["schemas"]["AuthTokensResponse"];
                 };
             };
             /** @description Validation Error */
@@ -686,31 +1310,35 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["LogoutRequest"] | null;
+            };
+        };
         responses: {
             /** @description Successful Response */
-            200: {
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["StatusResponse"];
-                };
+                content?: never;
             };
-            /** @description Unauthorized */
-            401: {
+            /** @description Validation Error */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
     };
-    list_planets_v1_planets_list_get: {
+    get_user_by_nickname_v1_users_get: {
         parameters: {
-            query?: never;
+            query: {
+                nickname: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -723,56 +1351,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PlanetsListResponse"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    get_planet_progress_v1_planets__planet_id__progress_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                planet_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PlanetProgressResponse"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["UserByNicknameResponse"];
                 };
             };
             /** @description Validation Error */
@@ -786,18 +1365,16 @@ export interface operations {
             };
         };
     };
-    set_focus_planet_v1_planets__planet_id__focus_patch: {
+    create_user_v1_users_post: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                planet_id: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["FocusBody"];
+                "application/json": components["schemas"]["UserByNicknameRequest"];
             };
         };
         responses: {
@@ -807,129 +1384,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["StatusResponse"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    submit_game_run_v1_games__game_code__runs_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                game_code: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["GameRunBody"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["GameRunResponse"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    get_leaderboard_v1_leaderboard_planet__planet_id__get: {
-        parameters: {
-            query?: {
-                period?: string;
-            };
-            header?: never;
-            path: {
-                planet_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["LeaderboardResponse"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["UserByNicknameResponse"];
                 };
             };
             /** @description Validation Error */
@@ -961,13 +1416,249 @@ export interface operations {
                     "application/json": components["schemas"]["MeResponse"];
                 };
             };
-            /** @description Unauthorized */
-            401: {
+        };
+    };
+    create_friendship_v1_friends_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FriendAddRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["SimpleSuccessResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_friends_v1_friends__user_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FriendEntryOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_play_together_v1_play_together_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlayTogetherRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlayTogetherResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_payment_request_endpoint_v1_payment_requests_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PaymentRequestCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentRequestCreateResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_payment_request_endpoint_v1_payment_requests__request_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentRequestOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pay_payment_request_endpoint_v1_payment_requests__request_id__pay_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentRequestPayResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_profile_v1_profile_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GalaxyProfileResponse"];
+                };
+            };
+        };
+    };
+    set_focus_planet_v1_profile_focus_planet_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["modules__profile__schemas__FocusPlanetRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GalaxyProfileResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -987,16 +1678,164 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PromoCodesResponse"];
+                    "application/json": components["schemas"]["PromoCodeOut"][];
                 };
             };
-            /** @description Unauthorized */
-            401: {
+        };
+    };
+    get_planets_v1_planets_list_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["PlanetListItemOut"][];
+                };
+            };
+        };
+    };
+    get_planet_progress_v1_planets__planet_id__progress_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                planet_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["modules__planets__schemas__PlanetProgressOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    focus_planet_v1_planets__planet_id__focus_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                planet_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["modules__planets__schemas__FocusPlanetRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FocusPlanetResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_quests_v1_quests_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestOut"][];
+                };
+            };
+        };
+    };
+    claim_quest_v1_quests__quest_id__claim_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                quest_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RewardOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_reward_ledger_v1_rewards_ledger_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RewardOut"][];
                 };
             };
         };
@@ -1016,21 +1855,12 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ReferralsResponse"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["ReferralListResponse"];
                 };
             };
         };
     };
-    create_referral_v1_referrals_post: {
+    create_referral_invite_v1_referrals_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -1039,7 +1869,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ReferralCreateBody"];
+                "application/json": components["schemas"]["ReferralCreateRequest"];
             };
         };
         responses: {
@@ -1050,15 +1880,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ReferralCreateResponse"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Validation Error */
@@ -1072,14 +1893,20 @@ export interface operations {
             };
         };
     };
-    admin_reset_v1_admin_reset_post: {
+    create_game_run_v1_games__game_code__runs_post: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                game_code: components["schemas"]["GameCode"];
+            };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GameRunSubmitRequest"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -1087,12 +1914,21 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AdminResetResponse"];
+                    "application/json": components["schemas"]["GameRunOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
     };
-    admin_end_period_v1_admin_end_period_post: {
+    game_summary_v1_games_summary_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -1107,7 +1943,126 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AdminEndPeriodResponse"];
+                    "application/json": components["schemas"]["GameSummaryOut"];
+                };
+            };
+        };
+    };
+    leaderboard_v1_leaderboard_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeaderboardEntryOut"][];
+                };
+            };
+        };
+    };
+    planet_leaderboard_v1_leaderboard_planet__planet_id__get: {
+        parameters: {
+            query?: {
+                period?: string;
+            };
+            header?: never;
+            path: {
+                planet_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanetLeaderboardOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    transaction_webhook_v1_transactions_webhook_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-internal-token"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransactionWebhookRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransactionWebhookResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    end_period_endpoint_v1_admin_end_period_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-internal-token"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EndPeriodResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

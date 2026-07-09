@@ -1,0 +1,50 @@
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+#root {
+  display: flex;
+}
+
+#root > div {
+  flex: 1;
+  min-height: 0;
+}
+
+body {
+  background: #060817;
+  overflow: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.demo-login-button {
+  appearance: none;
+  background: #f8fafc;
+  border: 0;
+  border-radius: 999px;
+  bottom: 96px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+  color: #08111f;
+  cursor: pointer;
+  font: 700 14px/1.2 system-ui, sans-serif;
+  left: 20px;
+  padding: 13px 18px;
+  position: fixed;
+  right: 20px;
+  z-index: 20;
+}
+
+.demo-login-button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.demo-login-button[hidden] {
+  display: none;
+}

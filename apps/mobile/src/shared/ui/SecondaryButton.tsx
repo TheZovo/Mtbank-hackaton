@@ -26,22 +26,25 @@ export function SecondaryButton({ children, disabled, onPress }: SecondaryButton
 
 const styles = StyleSheet.create({
   button: {
-    borderColor: colors.border,
-    borderRadius: 14,
-    borderWidth: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    backgroundColor: "transparent",
+    borderColor: colors.primary,
+    borderRadius: 40,
+    borderWidth: 1.5,
+    justifyContent: "center",
+    minHeight: 56,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
   },
   disabled: {
     opacity: 0.55,
   },
   pressed: {
-    opacity: 0.88,
+    backgroundColor: colors.primarySoft,
   },
   label: {
-    color: colors.text,
-    fontSize: 15,
-    fontWeight: "600",
+    color: colors.primary,
+    fontSize: 16,
+    fontWeight: "700",
     textAlign: "center",
   },
 });

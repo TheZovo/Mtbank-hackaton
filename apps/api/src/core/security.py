@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import base64
+import bcrypt
 import hashlib
 import hmac
 import re
@@ -55,6 +57,27 @@ def make_display_name(phone: str) -> str:
 
 def generate_refresh_token() -> str:
     return secrets.token_urlsafe(48)
+
+
+def build_refresh_token(session_id: str) -> str:
+    secret = base64.urlsafe_b64encode(secrets.token_bytes(32)).decode("ascii").rstrip("=")
+    return f"{session_id}.{secret}"
+
+
+def extract_refresh_session_id(refresh_token: str) -> str | None:
+    session_id, _, _ = refresh_token.partition(".")
+    return session_id or None
+
+
+def hash_refresh_token(refresh_token: str) -> str:
+    return bcrypt.hashpw(refresh_token.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+
+def verify_refresh_token(refresh_token: str, refresh_token_hash: str) -> bool:
+    try:
+        return bcrypt.checkpw(refresh_token.encode("utf-8"), refresh_token_hash.encode("utf-8"))
+    except ValueError:
+        return False
 
 
 def create_access_token(*, settings: Settings, user_id: str, session_id: str) -> tuple[str, int]:

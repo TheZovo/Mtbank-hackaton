@@ -9,6 +9,7 @@ __pycache__/
 *.egg-info/
 *.tsbuildinfo
 dev-server*.log
+*.log
 openapi.json
 apps/api/.env
 apps/mobile/.env

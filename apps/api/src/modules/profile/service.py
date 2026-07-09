@@ -1,9 +1,21 @@
 from __future__ import annotations
 
+from datetime import date
+
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db.models import ActivityLog, BoosterWindow, PlanetState, Quest, QuestProgress, RewardLedger, User, UserProfile
+from db.models import (
+    ActivityLog,
+    BoosterWindow,
+    GameAttempt,
+    PlanetState,
+    Quest,
+    QuestProgress,
+    RewardLedger,
+    User,
+    UserProfile,
+)
 from modules.profile.schemas import (
     ActivityOut,
     BoosterWindowOut,
@@ -60,9 +72,17 @@ def map_quest_entry(quest: Quest, progress: QuestProgress) -> QuestOut:
 
 async def build_me_response(session: AsyncSession, user: User) -> MeResponse:
     profile = await session.get(UserProfile, user.user_id)
+    attempts = await session.get(GameAttempt, (user.user_id, date.today()))
+    selected_planet = profile.focus_planet_id or profile.selected_planet
     return MeResponse(
+        id=user.user_id,
+        phone=user.phone,
+        name=user.display_name,
+        nickname=user.nickname,
+        daily_game_attempts_used=attempts.attempts_used if attempts is not None else 0,
+        daily_game_attempts_limit=5,
         user=UserSummaryOut.model_validate(user, from_attributes=True),
-        selected_planet=profile.selected_planet,
+        selected_planet=selected_planet,
     )
 
 
@@ -111,7 +131,7 @@ async def build_profile_response(session: AsyncSession, user: User) -> GalaxyPro
         bonus_streak=profile.bonus_streak,
         vault_charge=profile.vault_charge,
         vault_crates=profile.vault_crates,
-        selected_planet=profile.selected_planet,
+        selected_planet=profile.focus_planet_id or profile.selected_planet,
         rating=RatingOverviewOut(
             rating_score=profile.rating_score,
             bank_rank=profile.bank_rank,

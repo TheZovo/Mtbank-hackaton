@@ -45,3 +45,7 @@ def get_otp_store(request: Request):
 
 def get_job_dispatcher(request: Request):
     return request.app.state.job_dispatcher
+
+
+def get_leaderboard_cache(request: Request):
+    return request.app.state.leaderboard_cache

@@ -1,155 +1,105 @@
 # MTB Galaxy
 
-Этот репозиторий содержит мобильный монорепозиторий MTB Galaxy и отдельный мок-сервер для параллельной разработки интерфейсов, backend-логики и API-контрактов.
+Текущий репозиторий это мобильный монорепозиторий MTB Galaxy с основным backend в `apps/api`, мобильным клиентом в `apps/mobile` и типами/контрактами в `contracts` и `packages/contracts`.
 
-## Что добавлено по ТЗ
+## Основные модули
 
-- `mock-server/` - FastAPI мок-сервер с in-memory состоянием, auth, CORS и логированием.
-- `contracts/openapi.yaml` - OpenAPI-спецификация всех ручек из документа.
-- `contracts/generated/api.ts` - сгенерированные TypeScript-типы для фронтенда.
-- `contracts/generate.js` - скрипт повторной генерации спецификации и типов.
+- `apps/api` - основной FastAPI backend.
+- `apps/mobile` - React Native клиент.
+- `packages/contracts` - runtime-friendly TS типы для mobile.
+- `contracts` - OpenAPI YAML и generated API artifacts.
+- `mock-server` - отдельный упрощённый mock backend для параллельной разработки.
+
+## Что реализовано по документу
+
+- Planet map и planet detail/constellation flow в `apps/mobile`.
+- Friends flow: поиск по nickname, добавление в друзья, `play-together`, gift promo-code.
+- AI screen с локальным анализом мок-транзакций.
+- QR flow: создание платежного запроса, генерация QR, payload fallback и runtime camera-scanner path.
+- Profile nickname flow.
+- Backend endpoints для `users`, `friends`, `play-together`, `payment-requests`.
 
 ## Установка
 
 ```bash
 python -m venv .venv
 .venv\Scripts\activate
-pip install -r mock-server/requirements.txt
+python -m pip install -e .\apps\api[dev]
 npm install
 ```
 
-## Запуск мок-сервера
-
-Один из двух вариантов:
+## Запуск backend
 
 ```bash
-python mock-server/mock_server.py
+npm run dev:api
+```
+
+По умолчанию API поднимается на `http://localhost:8000` с префиксом `/v1`.
+
+## Запуск mobile
+
+```bash
+npm run android
 ```
 
 или
 
 ```bash
-npm run mock
+npm run ios
 ```
 
-По умолчанию сервер стартует на `http://localhost:8001`.
+Для Android-эмулятора используйте `API_BASE_URL=http://10.0.2.2:8000/v1`.
 
-### Переменные окружения
+## Контракты
 
-- `MOCK_SERVER_PORT` - порт, по умолчанию `8001`.
-- `MOCK_SERVER_LOG_LEVEL` - уровень логирования, по умолчанию `INFO`.
-
-## Эндпоинты
-
-Все ручки доступны по префиксу `/v1`.
-
-### Auth
-
-- `POST /v1/auth/request-otp`
-- `POST /v1/auth/verify-otp`
-- `POST /v1/auth/refresh`
-- `POST /v1/auth/logout`
-
-### Планеты и прогресс
-
-- `GET /v1/planets/list`
-- `GET /v1/planets/{planet_id}/progress`
-- `PATCH /v1/planets/{planet_id}/focus`
-
-### Игры и лидерборд
-
-- `POST /v1/games/{game_code}/runs`
-- `GET /v1/leaderboard/planet/{planet_id}?period=week`
-
-### Профиль, промокоды и рефералы
-
-- `GET /v1/me`
-- `GET /v1/promocodes`
-- `GET /v1/referrals`
-- `POST /v1/referrals`
-
-### Администрирование мок-сервера
-
-- `POST /v1/admin/reset`
-- `POST /v1/admin/end_period`
-
-## Генерация OpenAPI и TypeScript-типов
+OpenAPI и generated types теперь строятся из `apps/api`, а не из `mock-server`.
 
 ```bash
-npm run generate:api
+npm run contracts:generate
 ```
 
 Команда:
 
-1. Создаёт `contracts/openapi.yaml` из FastAPI приложения.
-2. Генерирует `contracts/generated/api.ts` через `openapi-typescript`.
+1. Экспортирует `apps/api/openapi.json`.
+2. Сохраняет YAML в `contracts/openapi.yaml`.
+3. Генерирует `contracts/generated/api.ts`.
+
+## Ключевые document endpoints
+
+Все ручки доступны по префиксу `/v1`.
+
+- `POST /v1/users`
+- `GET /v1/users?nickname=...`
+- `POST /v1/friends`
+- `GET /v1/friends/{user_id}`
+- `POST /v1/play-together`
+- `POST /v1/payment-requests`
+- `GET /v1/payment-requests/{request_id}`
+- `POST /v1/payment-requests/{request_id}/pay`
+
+Также сохранены существующие auth/profile/planets/games/leaderboard/referrals/promocodes ручки.
 
 ## Проверка
 
-```bash
-python -m pytest mock-server/tests
-```
-
-## Примеры curl-запросов
-
-### Запросить OTP
+Backend:
 
 ```bash
-curl -X POST http://localhost:8001/v1/auth/request-otp ^
-  -H "Content-Type: application/json" ^
-  -d "{\"phone\":\"+79991234567\"}"
+$env:PYTHONPATH='D:\Mtb_new\apps\api\src'
+.\.venv\Scripts\python.exe -m pytest apps/api/tests -v
 ```
 
-### Подтвердить OTP
+Mobile:
 
 ```bash
-curl -X POST http://localhost:8001/v1/auth/verify-otp ^
-  -H "Content-Type: application/json" ^
-  -d "{\"phone\":\"+79991234567\",\"code\":\"123456\",\"name\":\"Тестовый\"}"
+npm run test --workspace @mtb/mobile -- --runInBand
 ```
 
-### Получить профиль
+## QR scanner note
 
-```bash
-curl http://localhost:8001/v1/me ^
-  -H "Authorization: Bearer mock_access_token"
-```
+`apps/mobile` использует:
 
-### Отправить результат игры
+- `react-native-qrcode-svg` для генерации QR
+- `react-native-vision-camera`
+- `react-native-vision-camera-barcode-scanner`
 
-```bash
-curl -X POST http://localhost:8001/v1/games/halva_snake/runs ^
-  -H "Authorization: Bearer mock_access_token" ^
-  -H "Content-Type: application/json" ^
-  -d "{\"score\":180,\"planet_id\":\"apteki\"}"
-```
-
-### Завершить период
-
-```bash
-curl -X POST http://localhost:8001/v1/admin/end_period
-```
-
-### Сбросить состояние
-
-```bash
-curl -X POST http://localhost:8001/v1/admin/reset
-```
-
-## Как переключить фронтенд на мок-сервер
-
-Используйте базовый URL через переменную окружения `API_BASE_URL`.
-
-Примеры:
-
-- локально в браузере или iOS симуляторе: `API_BASE_URL=http://localhost:8001/v1`
-- Android эмулятор: `API_BASE_URL=http://10.0.2.2:8001/v1`
-- физическое устройство: `API_BASE_URL=http://<ваш-local-ip>:8001/v1`
-
-## Известные упрощения
-
-- Состояние хранится только в памяти и сбрасывается после перезапуска.
-- Любой Bearer токен считается валидным, кроме `invalid-token`.
-- Лимит игровых попыток общий на пользователя и сбрасывается только через `POST /v1/admin/reset` или после перезапуска.
-- Лидерборд детерминированно генерируется мок-данными и не связан с реальными пользователями.
-- Не моделируются бизнес-валидации вроде MCC, антифрода, реальной выдачи промокодов и сложной деградации.
+В тестовой среде и на неподготовленных runtime-окружениях экран QR продолжает работать через ручную вставку payload. Для реального camera scanning в нативном приложении должны быть настроены platform-specific permissions и пересобран mobile binary.

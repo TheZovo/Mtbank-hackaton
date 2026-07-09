@@ -8,9 +8,15 @@ interface TextFieldProps {
   onChangeText: (value: string) => void;
   secureTextEntry?: boolean;
   keyboardType?: "default" | "phone-pad" | "number-pad";
+  error?: string | null;
+  autoCapitalize?: "none" | "sentences" | "words" | "characters";
+  autoCorrect?: boolean;
 }
 
 export function TextField({
+  autoCapitalize = "sentences",
+  autoCorrect = false,
+  error,
   keyboardType = "default",
   label,
   onChangeText,
@@ -22,14 +28,17 @@ export function TextField({
     <View style={styles.wrapper}>
       <Text style={styles.label}>{label}</Text>
       <TextInput
+        autoCapitalize={autoCapitalize}
+        autoCorrect={autoCorrect}
         keyboardType={keyboardType}
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor={colors.textMuted}
         secureTextEntry={secureTextEntry}
-        style={styles.input}
+        style={[styles.input, error ? styles.inputError : null]}
         value={value}
       />
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
     </View>
   );
 }
@@ -41,16 +50,25 @@ const styles = StyleSheet.create({
   label: {
     color: colors.textMuted,
     fontSize: 13,
-    fontWeight: "600",
+    fontWeight: "700",
+    letterSpacing: 0.2,
   },
   input: {
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: "rgba(255,255,255,0.03)",
     borderColor: colors.border,
-    borderRadius: 14,
+    borderRadius: 20,
     borderWidth: 1,
     color: colors.text,
     fontSize: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
+    minHeight: 56,
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+  },
+  inputError: {
+    borderColor: colors.danger,
+  },
+  errorText: {
+    color: colors.danger,
+    fontSize: 13,
   },
 });

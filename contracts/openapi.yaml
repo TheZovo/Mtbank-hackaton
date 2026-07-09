@@ -1,37 +1,19 @@
 openapi: 3.1.0
 info:
-  title: MTB Galaxy Mock Server
-  description: Mock server for the MTB Galaxy mobile app. It provides OpenAPI contracts
-    and mutable in-memory data for frontend and backend parallel work.
+  title: MTB Galaxy API
   version: 1.0.0
 paths:
-  /healthz:
-    get:
-      tags:
-      - Utility
-      summary: Healthcheck
-      operationId: healthcheck_healthz_get
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                additionalProperties:
-                  type: string
-                type: object
-                title: Response Healthcheck Healthz Get
   /v1/auth/request-otp:
     post:
       tags:
-      - Auth
+      - auth
       summary: Request Otp
       operationId: request_otp_v1_auth_request_otp_post
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RequestOtpBody'
+              $ref: '#/components/schemas/RequestOtpRequest'
         required: true
       responses:
         '200':
@@ -49,14 +31,14 @@ paths:
   /v1/auth/verify-otp:
     post:
       tags:
-      - Auth
+      - auth
       summary: Verify Otp
       operationId: verify_otp_v1_auth_verify_otp_post
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/VerifyOtpBody'
+              $ref: '#/components/schemas/VerifyOtpRequest'
         required: true
       responses:
         '200':
@@ -64,13 +46,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VerifyOtpResponse'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/AuthLoginResponse'
         '422':
           description: Validation Error
           content:
@@ -80,14 +56,14 @@ paths:
   /v1/auth/refresh:
     post:
       tags:
-      - Auth
-      summary: Refresh Token
-      operationId: refresh_token_v1_auth_refresh_post
+      - auth
+      summary: Refresh Tokens
+      operationId: refresh_tokens_v1_auth_refresh_post
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RefreshBody'
+              $ref: '#/components/schemas/RefreshRequest'
         required: true
       responses:
         '200':
@@ -95,7 +71,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RefreshResponse'
+                $ref: '#/components/schemas/AuthTokensResponse'
         '422':
           description: Validation Error
           content:
@@ -105,49 +81,331 @@ paths:
   /v1/auth/logout:
     post:
       tags:
-      - Auth
+      - auth
       summary: Logout
       operationId: logout_v1_auth_logout_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+              - $ref: '#/components/schemas/LogoutRequest'
+              - type: 'null'
+              title: Payload
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - HTTPBearer: []
+  /v1/users:
+    post:
+      tags:
+      - users
+      summary: Create User
+      operationId: create_user_v1_users_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserByNicknameRequest'
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StatusResponse'
-        '401':
-          description: Unauthorized
+                $ref: '#/components/schemas/UserByNicknameResponse'
+        '422':
+          description: Validation Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - users
+      summary: Get User By Nickname
+      operationId: get_user_by_nickname_v1_users_get
+      parameters:
+      - name: nickname
+        in: query
+        required: true
+        schema:
+          type: string
+          title: Nickname
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserByNicknameResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/me:
+    get:
+      tags:
+      - users
+      summary: Get Me
+      operationId: get_me_v1_me_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeResponse'
+      security:
+      - HTTPBearer: []
+  /v1/friends:
+    post:
+      tags:
+      - friends
+      summary: Create Friendship
+      operationId: create_friendship_v1_friends_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FriendAddRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleSuccessResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/friends/{user_id}:
+    get:
+      tags:
+      - friends
+      summary: Get Friends
+      operationId: get_friends_v1_friends__user_id__get
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: User Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FriendEntryOut'
+                title: Response Get Friends V1 Friends  User Id  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/play-together:
+    post:
+      tags:
+      - friends
+      summary: Create Play Together
+      operationId: create_play_together_v1_play_together_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlayTogetherRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayTogetherResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/payment-requests:
+    post:
+      tags:
+      - payment-requests
+      summary: Create Payment Request Endpoint
+      operationId: create_payment_request_endpoint_v1_payment_requests_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequestCreateRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentRequestCreateResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/payment-requests/{request_id}:
+    get:
+      tags:
+      - payment-requests
+      summary: Get Payment Request Endpoint
+      operationId: get_payment_request_endpoint_v1_payment_requests__request_id__get
+      parameters:
+      - name: request_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Request Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentRequestOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/payment-requests/{request_id}/pay:
+    post:
+      tags:
+      - payment-requests
+      summary: Pay Payment Request Endpoint
+      operationId: pay_payment_request_endpoint_v1_payment_requests__request_id__pay_post
+      parameters:
+      - name: request_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Request Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentRequestPayResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/profile:
+    get:
+      tags:
+      - profile
+      summary: Get Profile
+      operationId: get_profile_v1_profile_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GalaxyProfileResponse'
+      security:
+      - HTTPBearer: []
+  /v1/profile/focus-planet:
+    patch:
+      tags:
+      - profile
+      summary: Set Focus Planet
+      operationId: set_focus_planet_v1_profile_focus_planet_patch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/modules__profile__schemas__FocusPlanetRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GalaxyProfileResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - HTTPBearer: []
+  /v1/promocodes:
+    get:
+      tags:
+      - promocodes
+      summary: Get Promocodes
+      operationId: get_promocodes_v1_promocodes_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/PromoCodeOut'
+                type: array
+                title: Response Get Promocodes V1 Promocodes Get
       security:
       - HTTPBearer: []
   /v1/planets/list:
     get:
       tags:
-      - Planets
-      summary: List Planets
-      operationId: list_planets_v1_planets_list_get
+      - planets
+      summary: Get Planets
+      operationId: get_planets_v1_planets_list_get
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PlanetsListResponse'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                items:
+                  $ref: '#/components/schemas/PlanetListItemOut'
+                type: array
+                title: Response Get Planets V1 Planets List Get
       security:
       - HTTPBearer: []
   /v1/planets/{planet_id}/progress:
     get:
       tags:
-      - Planets
+      - planets
       summary: Get Planet Progress
       operationId: get_planet_progress_v1_planets__planet_id__progress_get
       security:
@@ -165,19 +423,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PlanetProgressResponse'
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Unauthorized
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Not Found
+                $ref: '#/components/schemas/modules__planets__schemas__PlanetProgressOut'
         '422':
           description: Validation Error
           content:
@@ -187,9 +433,9 @@ paths:
   /v1/planets/{planet_id}/focus:
     patch:
       tags:
-      - Planets
-      summary: Set Focus Planet
-      operationId: set_focus_planet_v1_planets__planet_id__focus_patch
+      - planets
+      summary: Focus Planet
+      operationId: focus_planet_v1_planets__planet_id__focus_patch
       security:
       - HTTPBearer: []
       parameters:
@@ -204,38 +450,131 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/FocusBody'
+              $ref: '#/components/schemas/modules__planets__schemas__FocusPlanetRequest'
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StatusResponse'
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Unauthorized
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Not Found
+                $ref: '#/components/schemas/FocusPlanetResponse'
         '422':
           description: Validation Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /v1/quests:
+    get:
+      tags:
+      - quests
+      summary: Get Quests
+      operationId: get_quests_v1_quests_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/QuestOut'
+                type: array
+                title: Response Get Quests V1 Quests Get
+      security:
+      - HTTPBearer: []
+  /v1/quests/{quest_id}/claim:
+    post:
+      tags:
+      - quests
+      summary: Claim Quest
+      operationId: claim_quest_v1_quests__quest_id__claim_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: quest_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Quest Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RewardOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/rewards/ledger:
+    get:
+      tags:
+      - rewards
+      summary: Get Reward Ledger
+      operationId: get_reward_ledger_v1_rewards_ledger_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/RewardOut'
+                type: array
+                title: Response Get Reward Ledger V1 Rewards Ledger Get
+      security:
+      - HTTPBearer: []
+  /v1/referrals:
+    get:
+      tags:
+      - referrals
+      summary: Get Referrals
+      operationId: get_referrals_v1_referrals_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReferralListResponse'
+      security:
+      - HTTPBearer: []
+    post:
+      tags:
+      - referrals
+      summary: Create Referral Invite
+      operationId: create_referral_invite_v1_referrals_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReferralCreateRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReferralCreateResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - HTTPBearer: []
   /v1/games/{game_code}/runs:
     post:
       tags:
-      - Games
-      summary: Submit Game Run
-      operationId: submit_game_run_v1_games__game_code__runs_post
+      - games
+      summary: Create Game Run
+      operationId: create_game_run_v1_games__game_code__runs_post
       security:
       - HTTPBearer: []
       parameters:
@@ -243,45 +582,65 @@ paths:
         in: path
         required: true
         schema:
-          type: string
-          title: Game Code
+          $ref: '#/components/schemas/GameCode'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GameRunBody'
+              $ref: '#/components/schemas/GameRunSubmitRequest'
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GameRunResponse'
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Unauthorized
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Not Found
+                $ref: '#/components/schemas/GameRunOut'
         '422':
           description: Validation Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /v1/games/summary:
+    get:
+      tags:
+      - games
+      summary: Game Summary
+      operationId: game_summary_v1_games_summary_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameSummaryOut'
+      security:
+      - HTTPBearer: []
+  /v1/leaderboard:
+    get:
+      tags:
+      - leaderboard
+      summary: Leaderboard
+      operationId: leaderboard_v1_leaderboard_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/LeaderboardEntryOut'
+                type: array
+                title: Response Leaderboard V1 Leaderboard Get
+      security:
+      - HTTPBearer: []
   /v1/leaderboard/planet/{planet_id}:
     get:
       tags:
-      - Leaderboard
-      summary: Get Leaderboard
-      operationId: get_leaderboard_v1_leaderboard_planet__planet_id__get
+      - leaderboard
+      summary: Planet Leaderboard
+      operationId: planet_leaderboard_v1_leaderboard_planet__planet_id__get
       security:
       - HTTPBearer: []
       parameters:
@@ -296,8 +655,6 @@ paths:
         required: false
         schema:
           type: string
-          examples:
-          - week
           default: week
           title: Period
       responses:
@@ -306,268 +663,389 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LeaderboardResponse'
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Unauthorized
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Not Found
+                $ref: '#/components/schemas/PlanetLeaderboardOut'
         '422':
           description: Validation Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /v1/me:
-    get:
-      tags:
-      - Profile
-      summary: Get Me
-      operationId: get_me_v1_me_get
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MeResponse'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-      security:
-      - HTTPBearer: []
-  /v1/promocodes:
-    get:
-      tags:
-      - Promocodes
-      summary: Get Promocodes
-      operationId: get_promocodes_v1_promocodes_get
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PromoCodesResponse'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-      security:
-      - HTTPBearer: []
-  /v1/referrals:
-    get:
-      tags:
-      - Referrals
-      summary: Get Referrals
-      operationId: get_referrals_v1_referrals_get
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ReferralsResponse'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-      security:
-      - HTTPBearer: []
+  /v1/transactions/webhook:
     post:
       tags:
-      - Referrals
-      summary: Create Referral
-      operationId: create_referral_v1_referrals_post
+      - transactions
+      summary: Transaction Webhook
+      operationId: transaction_webhook_v1_transactions_webhook_post
+      parameters:
+      - name: x-internal-token
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Internal-Token
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ReferralCreateBody'
-        required: true
+              $ref: '#/components/schemas/TransactionWebhookRequest'
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReferralCreateResponse'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/TransactionWebhookResponse'
         '422':
           description: Validation Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-      security:
-      - HTTPBearer: []
-  /v1/admin/reset:
-    post:
-      tags:
-      - Admin
-      summary: Admin Reset
-      operationId: admin_reset_v1_admin_reset_post
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AdminResetResponse'
   /v1/admin/end_period:
     post:
       tags:
-      - Admin
-      summary: Admin End Period
-      operationId: admin_end_period_v1_admin_end_period_post
+      - admin
+      summary: End Period Endpoint
+      operationId: end_period_endpoint_v1_admin_end_period_post
+      parameters:
+      - name: x-internal-token
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Internal-Token
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AdminEndPeriodResponse'
+                $ref: '#/components/schemas/EndPeriodResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
 components:
   schemas:
-    AdminEndPeriodResponse:
+    ActivityOut:
       properties:
-        status:
+        activity_id:
           type: string
-          title: Status
-        promocodes_generated:
+          title: Activity Id
+        title:
+          type: string
+          title: Title
+        detail:
+          type: string
+          title: Detail
+        reward:
           type: integer
-          title: Promocodes Generated
-      additionalProperties: false
+          title: Reward
+        planet_code:
+          anyOf:
+          - $ref: '#/components/schemas/PlanetCode'
+          - type: 'null'
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
       type: object
       required:
+      - activity_id
+      - title
+      - detail
+      - reward
+      - planet_code
+      - created_at
+      title: ActivityOut
+    AuthLoginResponse:
+      properties:
+        access_token:
+          type: string
+          title: Access Token
+        refresh_token:
+          type: string
+          title: Refresh Token
+        token_type:
+          type: string
+          title: Token Type
+          default: bearer
+        expires_in_seconds:
+          type: integer
+          title: Expires In Seconds
+        user:
+          $ref: '#/components/schemas/UserSummaryOut'
+        me:
+          $ref: '#/components/schemas/MeResponse'
+      type: object
+      required:
+      - access_token
+      - refresh_token
+      - expires_in_seconds
+      - user
+      - me
+      title: AuthLoginResponse
+    AuthTokensResponse:
+      properties:
+        access_token:
+          type: string
+          title: Access Token
+        refresh_token:
+          type: string
+          title: Refresh Token
+        token_type:
+          type: string
+          title: Token Type
+          default: bearer
+        expires_in_seconds:
+          type: integer
+          title: Expires In Seconds
+      type: object
+      required:
+      - access_token
+      - refresh_token
+      - expires_in_seconds
+      title: AuthTokensResponse
+    BoosterWindowOut:
+      properties:
+        booster_id:
+          type: string
+          title: Booster Id
+        category:
+          type: string
+          title: Category
+        boost_rate:
+          type: number
+          title: Boost Rate
+        start_at:
+          type: string
+          format: date-time
+          title: Start At
+        end_at:
+          type: string
+          format: date-time
+          title: End At
+        status:
+          type: string
+          title: Status
+      type: object
+      required:
+      - booster_id
+      - category
+      - boost_rate
+      - start_at
+      - end_at
       - status
-      - promocodes_generated
-      title: AdminEndPeriodResponse
-    AdminResetResponse:
+      title: BoosterWindowOut
+    ConstellationCode:
+      type: string
+      enum:
+      - CASHBACK_COMET
+      - TRUST_ANCHOR
+      - COMMUNITY_NOVA
+      title: ConstellationCode
+    EndPeriodPlanetOut:
+      properties:
+        planet_id:
+          type: string
+          title: Planet Id
+        winners:
+          type: integer
+          title: Winners
+        period_id:
+          type: string
+          title: Period Id
+      type: object
+      required:
+      - planet_id
+      - winners
+      - period_id
+      title: EndPeriodPlanetOut
+    EndPeriodResponse:
       properties:
         status:
           type: string
           title: Status
-      additionalProperties: false
+        period_type:
+          type: string
+          title: Period Type
+        planets:
+          items:
+            $ref: '#/components/schemas/EndPeriodPlanetOut'
+          type: array
+          title: Planets
       type: object
       required:
       - status
-      title: AdminResetResponse
-    AuthUser:
+      - period_type
+      - planets
+      title: EndPeriodResponse
+    FocusPlanetResponse:
+      properties:
+        planet_id:
+          type: string
+          title: Planet Id
+        focus:
+          type: boolean
+          title: Focus
+      type: object
+      required:
+      - planet_id
+      - focus
+      title: FocusPlanetResponse
+    FriendAddRequest:
+      properties:
+        user_id:
+          type: string
+          title: User Id
+        friend_id:
+          type: string
+          title: Friend Id
+      type: object
+      required:
+      - user_id
+      - friend_id
+      title: FriendAddRequest
+    FriendEntryOut:
       properties:
         id:
           type: string
           title: Id
-        phone:
+        nickname:
           type: string
-          title: Phone
-        name:
-          type: string
-          title: Name
-      additionalProperties: false
+          title: Nickname
+        games_played:
+          type: integer
+          title: Games Played
       type: object
       required:
       - id
-      - phone
-      - name
-      title: AuthUser
-    ConstellationProgress:
+      - nickname
+      - games_played
+      title: FriendEntryOut
+    GalaxyProfileResponse:
       properties:
-        name:
-          type: string
-          title: Name
-        index:
+        user:
+          $ref: '#/components/schemas/UserSummaryOut'
+        orbit_level:
           type: integer
-          title: Index
-        big_stars_total:
+          title: Orbit Level
+        total_energy:
           type: integer
-          title: Big Stars Total
-        current_big_star:
+          title: Total Energy
+        total_xp:
           type: integer
-          title: Current Big Star
-        small_stars_per_segment:
+          title: Total Xp
+        stardust:
           type: integer
-          title: Small Stars Per Segment
-        small_stars_current:
+          title: Stardust
+        bonus_streak:
           type: integer
-          title: Small Stars Current
-        big_stars:
+          title: Bonus Streak
+        vault_charge:
+          type: integer
+          title: Vault Charge
+        vault_crates:
+          type: integer
+          title: Vault Crates
+        selected_planet:
+          $ref: '#/components/schemas/PlanetCode'
+        rating:
+          $ref: '#/components/schemas/RatingOverviewOut'
+        wallet:
+          $ref: '#/components/schemas/WalletOut'
+        quest_summary:
+          $ref: '#/components/schemas/QuestSummaryOut'
+        constellations:
           items:
-            type: boolean
+            $ref: '#/components/schemas/modules__profile__schemas__ConstellationOut'
           type: array
-          title: Big Stars
-        segment_small_stars:
+          title: Constellations
+        planets:
           items:
-            type: integer
+            $ref: '#/components/schemas/modules__profile__schemas__PlanetProgressOut'
           type: array
-          title: Segment Small Stars
-      additionalProperties: false
+          title: Planets
+        active_boosters:
+          items:
+            $ref: '#/components/schemas/BoosterWindowOut'
+          type: array
+          title: Active Boosters
+        quests:
+          items:
+            $ref: '#/components/schemas/QuestOut'
+          type: array
+          title: Quests
+        reward_ledger_preview:
+          items:
+            $ref: '#/components/schemas/RewardOut'
+          type: array
+          title: Reward Ledger Preview
+        activity:
+          items:
+            $ref: '#/components/schemas/ActivityOut'
+          type: array
+          title: Activity
+        installment_profile:
+          $ref: '#/components/schemas/InstallmentProfileOut'
       type: object
       required:
-      - name
-      - index
-      - big_stars_total
-      - current_big_star
-      - small_stars_per_segment
-      - small_stars_current
-      - big_stars
-      - segment_small_stars
-      title: ConstellationProgress
-    ErrorResponse:
+      - user
+      - orbit_level
+      - total_energy
+      - total_xp
+      - stardust
+      - bonus_streak
+      - vault_charge
+      - vault_crates
+      - selected_planet
+      - rating
+      - wallet
+      - quest_summary
+      - constellations
+      - planets
+      - active_boosters
+      - quests
+      - reward_ledger_preview
+      - activity
+      - installment_profile
+      title: GalaxyProfileResponse
+    GameCode:
+      type: string
+      enum:
+      - halva_snake
+      - credit_shield_reactor
+      - social_ring_signal
+      title: GameCode
+    GameRunOut:
       properties:
-        detail:
+        run_id:
           type: string
-          title: Detail
-      additionalProperties: false
-      type: object
-      required:
-      - detail
-      title: ErrorResponse
-    FocusBody:
-      properties:
-        focus:
-          type: boolean
-          title: Focus
-          default: true
-      additionalProperties: false
-      type: object
-      title: FocusBody
-    GameRunBody:
-      properties:
+          title: Run Id
+        game_code:
+          $ref: '#/components/schemas/GameCode'
+        planet_code:
+          $ref: '#/components/schemas/PlanetCode'
         score:
           type: integer
-          minimum: 0.0
           title: Score
-        planet_id:
-          type: string
-          title: Planet Id
-      additionalProperties: false
-      type: object
-      required:
-      - score
-      - planet_id
-      title: GameRunBody
-    GameRunResponse:
-      properties:
+        base_reward:
+          type: integer
+          title: Base Reward
+        total_reward:
+          type: integer
+          title: Total Reward
+        bonus_breakdown:
+          additionalProperties: true
+          type: object
+          title: Bonus Breakdown
         small_star_awarded:
           type: boolean
           title: Small Star Awarded
@@ -575,14 +1053,97 @@ components:
           type: integer
           title: Remaining Attempts Today
         planet_progress:
-          $ref: '#/components/schemas/PlanetProgressResponse'
-      additionalProperties: false
+          $ref: '#/components/schemas/modules__planets__schemas__PlanetProgressOut'
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
       type: object
       required:
+      - run_id
+      - game_code
+      - planet_code
+      - score
+      - base_reward
+      - total_reward
+      - bonus_breakdown
       - small_star_awarded
       - remaining_attempts_today
       - planet_progress
-      title: GameRunResponse
+      - created_at
+      title: GameRunOut
+    GameRunSubmitRequest:
+      properties:
+        score:
+          type: integer
+          title: Score
+        planet_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Planet Id
+      type: object
+      required:
+      - score
+      title: GameRunSubmitRequest
+    GameSummaryItemOut:
+      properties:
+        game_code:
+          $ref: '#/components/schemas/GameCode'
+        planet_code:
+          $ref: '#/components/schemas/PlanetCode'
+        runs:
+          type: integer
+          title: Runs
+        best_score:
+          type: integer
+          title: Best Score
+        total_reward:
+          type: integer
+          title: Total Reward
+        total_cashback:
+          type: number
+          title: Total Cashback
+        total_bonus_points:
+          type: integer
+          title: Total Bonus Points
+      type: object
+      required:
+      - game_code
+      - planet_code
+      - runs
+      - best_score
+      - total_reward
+      - total_cashback
+      - total_bonus_points
+      title: GameSummaryItemOut
+    GameSummaryOut:
+      properties:
+        total_runs:
+          type: integer
+          title: Total Runs
+        total_reward:
+          type: integer
+          title: Total Reward
+        total_cashback:
+          type: number
+          title: Total Cashback
+        total_bonus_points:
+          type: integer
+          title: Total Bonus Points
+        games:
+          items:
+            $ref: '#/components/schemas/GameSummaryItemOut'
+          type: array
+          title: Games
+      type: object
+      required:
+      - total_runs
+      - total_reward
+      - total_cashback
+      - total_bonus_points
+      - games
+      title: GameSummaryOut
     HTTPValidationError:
       properties:
         detail:
@@ -592,60 +1153,77 @@ components:
           title: Detail
       type: object
       title: HTTPValidationError
-    LeaderboardEntry:
+    InstallmentProfileOut:
       properties:
-        rank:
+        current_limit:
+          type: number
+          title: Current Limit
+        available_limit:
+          type: number
+          title: Available Limit
+        risk_score:
           type: integer
-          title: Rank
+          title: Risk Score
+        on_time_payments_3m:
+          type: integer
+          title: On Time Payments 3M
+        late_flags:
+          type: integer
+          title: Late Flags
+      type: object
+      required:
+      - current_limit
+      - available_limit
+      - risk_score
+      - on_time_payments_3m
+      - late_flags
+      title: InstallmentProfileOut
+    LeaderboardEntryOut:
+      properties:
         user_id:
           type: string
           title: User Id
-        name:
+        display_name:
           type: string
-          title: Name
-        avatar_url:
-          type: string
-          title: Avatar Url
-        stars:
+          title: Display Name
+        orbit_level:
           type: integer
-          title: Stars
-      additionalProperties: false
+          title: Orbit Level
+        total_xp:
+          type: integer
+          title: Total Xp
+        rating_score:
+          type: integer
+          title: Rating Score
+        bank_rank:
+          type: string
+          title: Bank Rank
+        total_stars:
+          type: integer
+          title: Total Stars
+        cashback_balance:
+          type: number
+          title: Cashback Balance
       type: object
       required:
-      - rank
       - user_id
-      - name
-      - avatar_url
-      - stars
-      title: LeaderboardEntry
-    LeaderboardResponse:
+      - display_name
+      - orbit_level
+      - total_xp
+      - rating_score
+      - bank_rank
+      - total_stars
+      - cashback_balance
+      title: LeaderboardEntryOut
+    LogoutRequest:
       properties:
-        planet_id:
-          type: string
-          title: Planet Id
-        period:
-          type: string
-          title: Period
-        my_rank:
-          type: integer
-          title: My Rank
-        my_stars:
-          type: integer
-          title: My Stars
-        leaders:
-          items:
-            $ref: '#/components/schemas/LeaderboardEntry'
-          type: array
-          title: Leaders
-      additionalProperties: false
+        refresh_token:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Refresh Token
       type: object
-      required:
-      - planet_id
-      - period
-      - my_rank
-      - my_stars
-      - leaders
-      title: LeaderboardResponse
+      title: LogoutRequest
     MeResponse:
       properties:
         id:
@@ -657,19 +1235,21 @@ components:
         name:
           type: string
           title: Name
+        nickname:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Nickname
         daily_game_attempts_used:
           type: integer
           title: Daily Game Attempts Used
         daily_game_attempts_limit:
           type: integer
           title: Daily Game Attempts Limit
-        total_constellations_sum:
-          type: integer
-          title: Total Constellations Sum
-        average_cashback:
-          type: number
-          title: Average Cashback
-      additionalProperties: false
+        user:
+          $ref: '#/components/schemas/UserSummaryOut'
+        selected_planet:
+          $ref: '#/components/schemas/PlanetCode'
       type: object
       required:
       - id
@@ -677,10 +1257,73 @@ components:
       - name
       - daily_game_attempts_used
       - daily_game_attempts_limit
-      - total_constellations_sum
-      - average_cashback
+      - user
+      - selected_planet
       title: MeResponse
-    PlanetGameProgress:
+    PaymentRequestCreateRequest:
+      properties:
+        amount:
+          type: number
+          title: Amount
+        description:
+          type: string
+          title: Description
+        user_id:
+          type: string
+          title: User Id
+      type: object
+      required:
+      - amount
+      - description
+      - user_id
+      title: PaymentRequestCreateRequest
+    PaymentRequestCreateResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+      type: object
+      required:
+      - id
+      title: PaymentRequestCreateResponse
+    PaymentRequestOut:
+      properties:
+        id:
+          type: string
+          title: Id
+        amount:
+          type: number
+          title: Amount
+        description:
+          type: string
+          title: Description
+        status:
+          type: string
+          title: Status
+      type: object
+      required:
+      - id
+      - amount
+      - description
+      - status
+      title: PaymentRequestOut
+    PaymentRequestPayResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+      type: object
+      required:
+      - success
+      title: PaymentRequestPayResponse
+    PlanetCode:
+      type: string
+      enum:
+      - ORBIT_COMMERCE
+      - CREDIT_SHIELD
+      - SOCIAL_RING
+      title: PlanetCode
+    PlanetGameOut:
       properties:
         code:
           type: string
@@ -688,53 +1331,75 @@ components:
         name:
           type: string
           title: Name
-        daily_attempts_used:
+        attempts_used:
           type: integer
-          title: Daily Attempts Used
-        daily_attempts_limit:
+          title: Attempts Used
+        attempts_limit:
           type: integer
-          title: Daily Attempts Limit
-      additionalProperties: false
+          title: Attempts Limit
       type: object
       required:
       - code
       - name
-      - daily_attempts_used
-      - daily_attempts_limit
-      title: PlanetGameProgress
-    PlanetProgressResponse:
+      - attempts_used
+      - attempts_limit
+      title: PlanetGameOut
+    PlanetLeaderboardItemOut:
+      properties:
+        rank:
+          type: integer
+          title: Rank
+        user_id:
+          type: string
+          title: User Id
+        display_name:
+          type: string
+          title: Display Name
+        small_stars:
+          type: integer
+          title: Small Stars
+        is_current_user:
+          type: boolean
+          title: Is Current User
+          default: false
+      type: object
+      required:
+      - rank
+      - user_id
+      - display_name
+      - small_stars
+      title: PlanetLeaderboardItemOut
+    PlanetLeaderboardOut:
       properties:
         planet_id:
           type: string
           title: Planet Id
-        cashback_percent:
-          type: number
-          title: Cashback Percent
-        max_cashback_reached:
-          type: boolean
-          title: Max Cashback Reached
-        constellation:
-          $ref: '#/components/schemas/ConstellationProgress'
-        period_small_stars:
-          type: integer
-          title: Period Small Stars
-        big_stars_until_increase:
-          type: integer
-          title: Big Stars Until Increase
-        game:
-          $ref: '#/components/schemas/PlanetGameProgress'
-      additionalProperties: false
+        period:
+          type: string
+          title: Period
+        period_ends_at:
+          type: string
+          format: date-time
+          title: Period Ends At
+        top:
+          items:
+            $ref: '#/components/schemas/PlanetLeaderboardItemOut'
+          type: array
+          title: Top
+        current_user_rank:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Current User Rank
       type: object
       required:
       - planet_id
-      - cashback_percent
-      - max_cashback_reached
-      - constellation
-      - period_small_stars
-      - big_stars_until_increase
-      - game
-      title: PlanetProgressResponse
-    PlanetSummary:
+      - period
+      - period_ends_at
+      - top
+      - current_user_rank
+      title: PlanetLeaderboardOut
+    PlanetListItemOut:
       properties:
         id:
           type: string
@@ -746,36 +1411,56 @@ components:
           type: number
           title: Cashback Percent
         progress_percent:
-          type: integer
+          type: number
           title: Progress Percent
-      additionalProperties: false
       type: object
       required:
       - id
       - name
       - cashback_percent
       - progress_percent
-      title: PlanetSummary
-    PlanetsListResponse:
+      title: PlanetListItemOut
+    PlayTogetherRequest:
       properties:
-        planets:
-          items:
-            $ref: '#/components/schemas/PlanetSummary'
-          type: array
-          title: Planets
-      additionalProperties: false
+        user_id:
+          type: string
+          title: User Id
+        friend_id:
+          type: string
+          title: Friend Id
       type: object
       required:
-      - planets
-      title: PlanetsListResponse
-    PromoCodeModel:
+      - user_id
+      - friend_id
+      title: PlayTogetherRequest
+    PlayTogetherResponse:
       properties:
-        code:
+        gift:
+          type: boolean
+          title: Gift
+        promocode:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Promocode
+      type: object
+      required:
+      - gift
+      title: PlayTogetherResponse
+    PromoCodeOut:
+      properties:
+        promocode_id:
           type: string
-          title: Code
+          title: Promocode Id
+        user_id:
+          type: string
+          title: User Id
         planet_id:
           type: string
           title: Planet Id
+        code:
+          type: string
+          title: Code
         issued_at:
           type: string
           format: date-time
@@ -786,35 +1471,126 @@ components:
             format: date-time
           - type: 'null'
           title: Used At
-      additionalProperties: false
       type: object
       required:
-      - code
+      - promocode_id
+      - user_id
       - planet_id
+      - code
       - issued_at
-      title: PromoCodeModel
-    PromoCodesResponse:
+      title: PromoCodeOut
+    QuestOut:
       properties:
-        promocodes:
-          items:
-            $ref: '#/components/schemas/PromoCodeModel'
-          type: array
-          title: Promocodes
-      additionalProperties: false
+        quest_id:
+          type: string
+          title: Quest Id
+        title:
+          type: string
+          title: Title
+        description:
+          type: string
+          title: Description
+        planet_code:
+          $ref: '#/components/schemas/PlanetCode'
+        category:
+          type: string
+          title: Category
+        condition_type:
+          type: string
+          title: Condition Type
+        threshold:
+          type: number
+          title: Threshold
+        reward_kind:
+          type: string
+          title: Reward Kind
+        reward_value:
+          type: number
+          title: Reward Value
+        reward_display:
+          type: string
+          title: Reward Display
+        stars_reward:
+          type: integer
+          title: Stars Reward
+        status:
+          type: string
+          title: Status
+        current_value:
+          type: number
+          title: Current Value
       type: object
       required:
-      - promocodes
-      title: PromoCodesResponse
-    ReferralCreateBody:
+      - quest_id
+      - title
+      - description
+      - planet_code
+      - category
+      - condition_type
+      - threshold
+      - reward_kind
+      - reward_value
+      - reward_display
+      - stars_reward
+      - status
+      - current_value
+      title: QuestOut
+    QuestSummaryOut:
+      properties:
+        active:
+          type: integer
+          title: Active
+        completed:
+          type: integer
+          title: Completed
+        claimed:
+          type: integer
+          title: Claimed
+      type: object
+      required:
+      - active
+      - completed
+      - claimed
+      title: QuestSummaryOut
+    RatingOverviewOut:
+      properties:
+        rating_score:
+          type: integer
+          title: Rating Score
+        bank_rank:
+          type: string
+          title: Bank Rank
+        total_stars:
+          type: integer
+          title: Total Stars
+        orbit_level:
+          type: integer
+          title: Orbit Level
+        completed_quests:
+          type: integer
+          title: Completed Quests
+      type: object
+      required:
+      - rating_score
+      - bank_rank
+      - total_stars
+      - orbit_level
+      - completed_quests
+      title: RatingOverviewOut
+    ReferralCreateRequest:
       properties:
         phone:
-          type: string
+          anyOf:
+          - type: string
+          - type: 'null'
           title: Phone
-      additionalProperties: false
+        invitee_phone:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Invitee Phone
       type: object
-      required:
-      - phone
-      title: ReferralCreateBody
+      title: ReferralCreateRequest
     ReferralCreateResponse:
       properties:
         status:
@@ -823,13 +1599,12 @@ components:
         invite_code:
           type: string
           title: Invite Code
-      additionalProperties: false
       type: object
       required:
       - status
       - invite_code
       title: ReferralCreateResponse
-    ReferralRecord:
+    ReferralInviteOut:
       properties:
         phone:
           type: string
@@ -840,89 +1615,230 @@ components:
         stars_earned:
           type: integer
           title: Stars Earned
-      additionalProperties: false
       type: object
       required:
       - phone
       - status
       - stars_earned
-      title: ReferralRecord
-    ReferralsResponse:
+      title: ReferralInviteOut
+    ReferralListResponse:
       properties:
         invite_code:
           type: string
           title: Invite Code
         referrals:
           items:
-            $ref: '#/components/schemas/ReferralRecord'
+            $ref: '#/components/schemas/ReferralInviteOut'
           type: array
           title: Referrals
-      additionalProperties: false
       type: object
       required:
       - invite_code
       - referrals
-      title: ReferralsResponse
-    RefreshBody:
+      title: ReferralListResponse
+    RefreshRequest:
       properties:
         refresh_token:
           type: string
           title: Refresh Token
-      additionalProperties: false
       type: object
       required:
       - refresh_token
-      title: RefreshBody
-    RefreshResponse:
-      properties:
-        access_token:
-          type: string
-          title: Access Token
-        refresh_token:
-          type: string
-          title: Refresh Token
-      additionalProperties: false
-      type: object
-      required:
-      - access_token
-      - refresh_token
-      title: RefreshResponse
-    RequestOtpBody:
+      title: RefreshRequest
+    RequestOtpRequest:
       properties:
         phone:
           type: string
           title: Phone
-          examples:
-          - '+79991234567'
-      additionalProperties: false
       type: object
       required:
       - phone
-      title: RequestOtpBody
+      title: RequestOtpRequest
     RequestOtpResponse:
       properties:
         message:
           type: string
           title: Message
-        dev_otp:
+          default: OTP sent
+        challenge_id:
           type: string
+          title: Challenge Id
+        expires_in_seconds:
+          type: integer
+          title: Expires In Seconds
+        dev_code:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Dev Code
+        dev_otp:
+          anyOf:
+          - type: string
+          - type: 'null'
           title: Dev Otp
-      additionalProperties: false
       type: object
       required:
-      - message
-      - dev_otp
+      - challenge_id
+      - expires_in_seconds
       title: RequestOtpResponse
-    StatusResponse:
+    RewardOut:
+      properties:
+        ledger_id:
+          type: string
+          title: Ledger Id
+        reward_type:
+          type: string
+          title: Reward Type
+        amount:
+          type: number
+          title: Amount
+        status:
+          type: string
+          title: Status
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        meta:
+          additionalProperties: true
+          type: object
+          title: Meta
+        title:
+          type: string
+          title: Title
+        description:
+          type: string
+          title: Description
+      type: object
+      required:
+      - ledger_id
+      - reward_type
+      - amount
+      - status
+      - created_at
+      - meta
+      - title
+      - description
+      title: RewardOut
+    SegmentKey:
+      type: string
+      enum:
+      - student
+      - first-jobber
+      - freelancer
+      title: SegmentKey
+    SimpleSuccessResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+      type: object
+      required:
+      - success
+      title: SimpleSuccessResponse
+    TransactionWebhookRequest:
+      properties:
+        user_id:
+          type: string
+          title: User Id
+        amount_rub:
+          type: number
+          title: Amount Rub
+        mcc_code:
+          type: string
+          title: Mcc Code
+      type: object
+      required:
+      - user_id
+      - amount_rub
+      - mcc_code
+      title: TransactionWebhookRequest
+    TransactionWebhookResponse:
       properties:
         status:
           type: string
           title: Status
-      additionalProperties: false
+        small_stars_awarded:
+          type: integer
+          title: Small Stars Awarded
+        planet_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Planet Id
       type: object
       required:
       - status
-      title: StatusResponse
+      - small_stars_awarded
+      - planet_id
+      title: TransactionWebhookResponse
+    UserByNicknameRequest:
+      properties:
+        nickname:
+          type: string
+          title: Nickname
+        user_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: User Id
+      type: object
+      required:
+      - nickname
+      title: UserByNicknameRequest
+    UserByNicknameResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+        nickname:
+          type: string
+          title: Nickname
+      type: object
+      required:
+      - id
+      - nickname
+      title: UserByNicknameResponse
+    UserSummaryOut:
+      properties:
+        user_id:
+          type: string
+          title: User Id
+        phone:
+          type: string
+          title: Phone
+        display_name:
+          type: string
+          title: Display Name
+        nickname:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Nickname
+        segment:
+          $ref: '#/components/schemas/SegmentKey'
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        id:
+          type: string
+          title: Id
+          readOnly: true
+        name:
+          type: string
+          title: Name
+          readOnly: true
+      type: object
+      required:
+      - user_id
+      - phone
+      - display_name
+      - segment
+      - created_at
+      - id
+      - name
+      title: UserSummaryOut
     ValidationError:
       properties:
         loc:
@@ -949,49 +1865,229 @@ components:
       - msg
       - type
       title: ValidationError
-    VerifyOtpBody:
+    VerifyOtpRequest:
       properties:
+        challenge_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Challenge Id
         phone:
           type: string
           title: Phone
-          examples:
-          - '+79991234567'
+        otp_code:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Otp Code
         code:
-          type: string
-          pattern: ^\d{6}$
+          anyOf:
+          - type: string
+          - type: 'null'
           title: Code
-          examples:
-          - '123456'
+        display_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Display Name
         name:
           anyOf:
           - type: string
           - type: 'null'
           title: Name
-          examples:
-          - Тестовый
-      additionalProperties: false
+        segment:
+          anyOf:
+          - $ref: '#/components/schemas/SegmentKey'
+          - type: 'null'
       type: object
       required:
       - phone
-      - code
-      title: VerifyOtpBody
-    VerifyOtpResponse:
+      title: VerifyOtpRequest
+    WalletOut:
       properties:
-        access_token:
-          type: string
-          title: Access Token
-        refresh_token:
-          type: string
-          title: Refresh Token
-        user:
-          $ref: '#/components/schemas/AuthUser'
-      additionalProperties: false
+        cashback_balance:
+          type: number
+          title: Cashback Balance
+        bonus_points:
+          type: integer
+          title: Bonus Points
+        rating_boost:
+          type: integer
+          title: Rating Boost
+        total_energy:
+          type: integer
+          title: Total Energy
+        vault_charge:
+          type: integer
+          title: Vault Charge
+        vault_crates:
+          type: integer
+          title: Vault Crates
       type: object
       required:
-      - access_token
-      - refresh_token
-      - user
-      title: VerifyOtpResponse
+      - cashback_balance
+      - bonus_points
+      - rating_boost
+      - total_energy
+      - vault_charge
+      - vault_crates
+      title: WalletOut
+    modules__planets__schemas__ConstellationOut:
+      properties:
+        name:
+          type: string
+          title: Name
+        index:
+          type: integer
+          title: Index
+        big_stars:
+          type: integer
+          title: Big Stars
+        current_big_star:
+          type: integer
+          title: Current Big Star
+        small_stars_current:
+          type: integer
+          title: Small Stars Current
+        small_stars_required:
+          type: integer
+          title: Small Stars Required
+        big_stars_state:
+          items:
+            type: boolean
+          type: array
+          title: Big Stars State
+        small_stars_state:
+          items:
+            type: boolean
+          type: array
+          title: Small Stars State
+      type: object
+      required:
+      - name
+      - index
+      - big_stars
+      - current_big_star
+      - small_stars_current
+      - small_stars_required
+      - big_stars_state
+      - small_stars_state
+      title: ConstellationOut
+    modules__planets__schemas__FocusPlanetRequest:
+      properties:
+        focus:
+          type: boolean
+          title: Focus
+      type: object
+      required:
+      - focus
+      title: FocusPlanetRequest
+    modules__planets__schemas__PlanetProgressOut:
+      properties:
+        planet_id:
+          type: string
+          title: Planet Id
+        name:
+          type: string
+          title: Name
+        cashback_percent:
+          type: number
+          title: Cashback Percent
+        max_cashback_reached:
+          type: boolean
+          title: Max Cashback Reached
+        constellation:
+          $ref: '#/components/schemas/modules__planets__schemas__ConstellationOut'
+        period_small_stars:
+          type: integer
+          title: Period Small Stars
+        big_stars_until_increase:
+          type: integer
+          title: Big Stars Until Increase
+        game:
+          $ref: '#/components/schemas/PlanetGameOut'
+      type: object
+      required:
+      - planet_id
+      - name
+      - cashback_percent
+      - max_cashback_reached
+      - constellation
+      - period_small_stars
+      - big_stars_until_increase
+      - game
+      title: PlanetProgressOut
+    modules__profile__schemas__ConstellationOut:
+      properties:
+        constellation_code:
+          $ref: '#/components/schemas/ConstellationCode'
+        title:
+          type: string
+          title: Title
+        theme:
+          type: string
+          title: Theme
+        headline:
+          type: string
+          title: Headline
+        accent:
+          type: string
+          title: Accent
+        planet_code:
+          $ref: '#/components/schemas/PlanetCode'
+        stars_filled:
+          type: integer
+          title: Stars Filled
+        total_stars:
+          type: integer
+          title: Total Stars
+        completion_ratio:
+          type: number
+          title: Completion Ratio
+        next_goal:
+          type: string
+          title: Next Goal
+      type: object
+      required:
+      - constellation_code
+      - title
+      - theme
+      - headline
+      - accent
+      - planet_code
+      - stars_filled
+      - total_stars
+      - completion_ratio
+      - next_goal
+      title: ConstellationOut
+    modules__profile__schemas__FocusPlanetRequest:
+      properties:
+        planet_code:
+          $ref: '#/components/schemas/PlanetCode'
+      type: object
+      required:
+      - planet_code
+      title: FocusPlanetRequest
+    modules__profile__schemas__PlanetProgressOut:
+      properties:
+        planet_code:
+          $ref: '#/components/schemas/PlanetCode'
+        xp:
+          type: integer
+          title: Xp
+        level:
+          type: integer
+          title: Level
+        mastery:
+          type: integer
+          title: Mastery
+      type: object
+      required:
+      - planet_code
+      - xp
+      - level
+      - mastery
+      title: PlanetProgressOut
   securitySchemes:
     HTTPBearer:
       type: http

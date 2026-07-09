@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "workspaces": [
     "apps/mobile",
+    "apps/web",
     "packages/contracts",
     "packages/shared",
     "packages/game-core"
@@ -12,6 +13,8 @@
     "dev": "concurrently -k -n api,mobile -c green,cyan \"npm run dev:api\" \"npm run dev:mobile\"",
     "dev:api": "python -m uvicorn main:app --app-dir apps/api/src --reload --port 8000",
     "dev:mobile": "npm run start --workspace @mtb/mobile",
+    "dev:web": "npm run dev --workspace @mtb/web",
+    "web": "npm run dev --workspace @mtb/web",
     "android": "npm run android --workspace @mtb/mobile",
     "ios": "npm run ios --workspace @mtb/mobile",
     "mock": "python mock-server/mock_server.py",
@@ -19,7 +22,7 @@
     "test:mock": "python -m pytest mock-server/tests",
     "test:mobile": "npm run test --workspace @mtb/mobile",
     "generate:api": "node contracts/generate.js",
-    "contracts:generate": "python apps/api/scripts/export_openapi.py && openapi-typescript apps/api/openapi.json -o packages/contracts/src/generated/api.ts"
+    "contracts:generate": "node contracts/generate.js"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",

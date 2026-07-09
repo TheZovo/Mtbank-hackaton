@@ -1,5 +1,6 @@
 import type { PropsWithChildren, ReactNode } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import type { ScrollViewProps } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, StatusBar, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "../theme/colors";
 
@@ -7,19 +8,29 @@ interface ScreenProps extends PropsWithChildren {
   title: string;
   subtitle?: string;
   footer?: ReactNode;
+  scrollViewProps?: ScrollViewProps;
 }
 
-export function Screen({ children, footer, subtitle, title }: ScreenProps) {
+export function Screen({ children, footer, scrollViewProps, subtitle, title }: ScreenProps) {
+  const { contentContainerStyle, ...restScrollViewProps } = scrollViewProps ?? {};
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.title}>{title}</Text>
-          {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
-        </View>
-        <View style={styles.body}>{children}</View>
-      </ScrollView>
-      {footer ? <View style={styles.footer}>{footer}</View> : null}
+      <StatusBar backgroundColor={colors.background} barStyle="light-content" />
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.safeArea}>
+        <ScrollView
+          contentContainerStyle={[styles.content, contentContainerStyle]}
+          keyboardShouldPersistTaps="handled"
+          {...restScrollViewProps}
+        >
+          <View style={styles.header}>
+            <Text style={styles.title}>{title}</Text>
+            {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+          </View>
+          <View style={styles.body}>{children}</View>
+        </ScrollView>
+        {footer ? <View style={styles.footer}>{footer}</View> : null}
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -31,28 +42,29 @@ const styles = StyleSheet.create({
   },
   content: {
     gap: 16,
-    padding: 20,
-    paddingBottom: 120,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 140,
   },
   header: {
-    gap: 8,
+    gap: 10,
   },
   title: {
     color: colors.text,
-    fontSize: 28,
-    fontWeight: "700",
+    fontSize: 30,
+    fontWeight: "800",
   },
   subtitle: {
     color: colors.textMuted,
     fontSize: 15,
-    lineHeight: 22,
+    lineHeight: 23,
   },
   body: {
-    gap: 16,
+    gap: 14,
   },
   footer: {
     backgroundColor: colors.background,
-    borderTopColor: colors.border,
+    borderTopColor: colors.borderStrong,
     borderTopWidth: 1,
     padding: 16,
   },

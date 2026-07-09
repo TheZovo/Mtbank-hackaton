@@ -1,20 +1,32 @@
 from __future__ import annotations
 
-from datetime import datetime
-
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, model_validator
 
 
 class ReferralCreateRequest(BaseModel):
-    invitee_phone: str
+    phone: str | None = None
+    invitee_phone: str | None = None
+
+    @model_validator(mode="after")
+    def normalize_phone(self) -> "ReferralCreateRequest":
+        if self.phone is None and self.invitee_phone is not None:
+            self.phone = self.invitee_phone
+        if not self.phone:
+            raise ValueError("phone is required")
+        return self
 
 
-class ReferralOut(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+class ReferralInviteOut(BaseModel):
+    phone: str
+    status: str
+    stars_earned: int
 
-    referral_id: str
-    inviter_user_id: str
-    invitee_phone: str
-    state: str
+
+class ReferralListResponse(BaseModel):
     invite_code: str
-    created_at: datetime
+    referrals: list[ReferralInviteOut]
+
+
+class ReferralCreateResponse(BaseModel):
+    status: str
+    invite_code: str
